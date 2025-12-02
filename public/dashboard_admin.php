@@ -27,88 +27,7 @@ try {
 
 <div class="container py-5">
     <div class="row">
-        <div class="col-md-4">
-            <div class="card mb-3">
-                <div class="card-body">
-                    <?php
-                        // Determine avatar path: prefer uploaded profile_picture from Users, Student, or Faculty tables; otherwise default
-                        $avatar = '../uploads/profile_pics/default.png';
-                        if ($user) {
-                            $storedPath = null;
-
-                            // If Users table contains profile_picture (not typical here), use it
-                            if (isset($user['profile_picture']) && !empty($user['profile_picture'])) {
-                                $storedPath = $user['profile_picture'];
-                            }
-
-                            // If not found on Users, try role-specific tables
-                            if (empty($storedPath)) {
-                                $role = $user['role'] ?? '';
-                                if (strtolower($role) === 'student') {
-                                    $s = $conn->prepare('SELECT profile_picture FROM Student WHERE user_id = ? LIMIT 1');
-                                    $s->bind_param('i', $_SESSION['user_id']);
-                                    $s->execute();
-                                    $sres = $s->get_result();
-                                    if ($sres && $sres->num_rows === 1) {
-                                        $srow = $sres->fetch_assoc();
-                                        $storedPath = $srow['profile_picture'] ?? null;
-                                    }
-                                    $s->close();
-                                } elseif (strtolower($role) === 'faculty') {
-                                    $f = $conn->prepare('SELECT profile_picture FROM Faculty WHERE user_id = ? LIMIT 1');
-                                    $f->bind_param('i', $_SESSION['user_id']);
-                                    $f->execute();
-                                    $fres = $f->get_result();
-                                    if ($fres && $fres->num_rows === 1) {
-                                        $frow = $fres->fetch_assoc();
-                                        $storedPath = $frow['profile_picture'] ?? null;
-                                    }
-                                    $f->close();
-                                }
-                            }
-
-                            // Normalize stored path and check file existence
-                            if (!empty($storedPath)) {
-                                // storedPath usually like 'uploads/profile_pics/filename.png'
-                                $candidate = __DIR__ . '/../' . ltrim($storedPath, '/');
-                                if (file_exists($candidate)) {
-                                    $avatar = '../' . ltrim($storedPath, '/');
-                                } else {
-                                    // try if only filename stored in DB
-                                    $candidate2 = __DIR__ . '/../uploads/profile_pics/' . basename($storedPath);
-                                    if (file_exists($candidate2)) {
-                                        $avatar = '../uploads/profile_pics/' . basename($storedPath);
-                                    }
-                                }
-                            }
-                        }
-                    ?>
-
-                    <div class="text-center mb-2">
-                        <img src="<?php echo htmlspecialchars($avatar); ?>" alt="Profile" class="rounded-circle" style="width:80px;height:80px;object-fit:cover;cursor:pointer;" data-bs-toggle="modal" data-bs-target="#profileModal">
-                    </div>
-
-                    <h5 class="card-title">Welcome</h5>
-                    <p class="card-text">
-                        <?php if ($user): ?>
-                            <strong><?php echo htmlspecialchars($user['name']); ?></strong><br>
-                            <small class="text-muted"><?php echo htmlspecialchars($user['role']); ?></small>
-                        <?php else: ?>
-                            <em>User information not available</em>
-                        <?php endif; ?>
-                    </p>
-                    <a href="logout.php" class="btn btn-sm btn-outline-secondary">Sign out</a>
-                </div>
-            </div>
-
-            <div class="card">
-                <div class="card-body">
-                    <h6>Create</h6>
-                    <p class="small text-muted">Create accounts or open the registration page.</p>
-                    <a href="register.php" class="btn btn-primary">Create an account</a>
-                </div>
-            </div>
-        </div>
+        <?php include __DIR__ . '/../includes/partials/dashboard_sidebar.php'; ?>
 
         <div class="col-md-8">
             <?php
@@ -124,11 +43,9 @@ try {
                         <div class="card-body">
                             <h5 class="card-title">Profile</h5>
                             <?php if ($user): ?>
-                                <table class="table table-borderless table-sm">
-                                    <tr><th>Name</th><td><?php echo htmlspecialchars($user['name']); ?></td></tr>
-                                    <tr><th>Username</th><td><?php echo htmlspecialchars($user['username']); ?></td></tr>
-                                    <tr><th>Email</th><td><?php echo htmlspecialchars($user['email']); ?></td></tr>
-                                </table>
+                                <p class="mb-2"><strong><?php echo htmlspecialchars($user['name']); ?></strong></p>
+                                <p class="small text-muted mb-3"><?php echo htmlspecialchars($user['email']); ?></p>
+                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#profileModal">View profile</button>
                             <?php else: ?>
                                 <p class="text-muted">No profile information available.</p>
                             <?php endif; ?>
