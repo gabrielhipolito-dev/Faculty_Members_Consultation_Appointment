@@ -12,7 +12,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 
 // Get form input
 $identifier = isset($_POST['identifier']) ? trim($_POST['identifier']) : '';
-$password   = isset($_POST['password']) ? $_POST['password'] : '';
+$password = isset($_POST['password']) ? $_POST['password'] : '';
 
 if ($identifier === '' || $password === '') {
     header('Location: ../public/login.php?error=' . urlencode('Enter username/email and password'));
@@ -39,28 +39,9 @@ $stmt->bind_param('s', $identifier);
 $stmt->execute();
 $result = $stmt->get_result();
 
-// Debugging output: show what the query returned
-if (!$result || $result->num_rows !== 1) {
-    // No user found
-    echo "<pre>";
-    echo "DEBUG: No user found\n";
-    echo "Identifier: '$identifier'\n";
-    echo "Query result: ";
-    var_dump($result);
-    echo "</pre>";
-    exit;
-}
-
 // Fetch user data
 $user = $result->fetch_assoc();
 $storedPassword = $user['password'];
-
-// Debug: show stored hash
-echo "<pre>";
-echo "DEBUG: User found\n";
-echo "Identifier: '$identifier'\n";
-echo "Stored password hash: '$storedPassword'\n";
-echo "</pre>";
 
 // Verify password
 $valid = false;
@@ -69,8 +50,8 @@ if (strpos($storedPassword, '$2y$') === 0 || strpos($storedPassword, '$2a$') ===
 } else {
     // Plain-text (not recommended)
     $valid = hash_equals((string)$storedPassword, (string)$password);
-
-    // Upgrade to hashed password
+    
+    // Upgrade to hashed password if correct
     if ($valid) {
         $newHash = password_hash($password, PASSWORD_DEFAULT);
         $up = $conn->prepare('UPDATE Users SET password = ? WHERE user_id = ?');
@@ -86,19 +67,15 @@ if (strpos($storedPassword, '$2y$') === 0 || strpos($storedPassword, '$2a$') ===
 if ($valid) {
     // Login success
     session_regenerate_id(true);
-    $_SESSION['user_id']  = $user['user_id'];
+    $_SESSION['user_id'] = $user['user_id'];
     $_SESSION['username'] = $user['username'];
-    $_SESSION['name']     = $user['name'];
-    $_SESSION['email']    = $user['email'];
-    $_SESSION['role']     = $user['role'];
-
+    $_SESSION['name'] = $user['name'];
+    $_SESSION['email'] = $user['email'];
+    $_SESSION['role'] = $user['role'];
+    
     header('Location: ../public/dashboard.php');
     exit;
-} /*else {
-    echo "<pre>";
-    echo "DEBUG: Password verification failed\n";
-    echo "Entered password: '$password'\n";
-    echo "Stored password: '$storedPassword'\n";
-    echo "</pre>";
+} else {
+    header('Location: ../public/login.php?error=' . urlencode('Invalid username/email or password'));
     exit;
-}*/
+}
