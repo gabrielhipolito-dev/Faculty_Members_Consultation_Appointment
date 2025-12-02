@@ -24,9 +24,7 @@ if ($direct) {
                         Elevate your workspace efficiency with Galileo's sleek and intuitive login page. 
                         Designed with simplicity, security, and speed in mind.
                     </p>
-                    <p>
-                        <a class="btn btn-outline-light" href="register.php">Create an account</a>
-                    </p>
+                    <!-- registration moved to dashboard for admins -->
                 </div>
             </div>
             <!-- Login card area -->

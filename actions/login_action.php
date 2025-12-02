@@ -72,8 +72,17 @@ if ($valid) {
     $_SESSION['name'] = $user['name'];
     $_SESSION['email'] = $user['email'];
     $_SESSION['role'] = $user['role'];
-    
-    header('Location: ../public/dashboard.php');
+    // Redirect to role-specific dashboard wrappers
+    $role = strtolower($user['role'] ?? '');
+    if ($role === 'admin') {
+        header('Location: ../public/dashboard_admin.php');
+    } elseif ($role === 'faculty') {
+        header('Location: ../public/dashboard_faculty.php');
+    } elseif ($role === 'student') {
+        header('Location: ../public/dashboard_student.php');
+    } else {
+        header('Location: ../public/dashboard.php');
+    }
     exit;
 } else {
     header('Location: ../public/login.php?error=' . urlencode('Invalid username/email or password'));
