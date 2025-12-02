@@ -23,6 +23,9 @@ $password = $_POST['password'] ?? '';
 $role = $_POST['role'] ?? 'Student';
 $contact = trim($_POST['contact_number'] ?? '');
 $address = trim($_POST['address'] ?? '');
+// optional fields
+$birthdate = trim($_POST['birthdate'] ?? '');
+$gender = trim($_POST['gender'] ?? '');
 
 if ($name === '' || $username === '' || $email === '' || $password === '') {
     header('Location: ../public/register.php?error=' . urlencode('Please fill required fields'));
@@ -32,6 +35,22 @@ if ($name === '' || $username === '' || $email === '' || $password === '') {
 // Enforce @gmail.com email addresses
 if (!preg_match('/@gmail\.com$/i', $email)) {
     header('Location: ../public/register.php?error=' . urlencode('Email must be a @gmail.com address'));
+    exit;
+}
+
+// Validate birthdate if provided (YYYY-MM-DD)
+if ($birthdate !== '') {
+    $d = DateTime::createFromFormat('Y-m-d', $birthdate);
+    if (!$d || $d->format('Y-m-d') !== $birthdate) {
+        header('Location: ../public/register.php?error=' . urlencode('Invalid birthdate format'));
+        exit;
+    }
+}
+
+// Validate gender (optional)
+$allowedGenders = ['Male','Female','Other',''];
+if (!in_array($gender, $allowedGenders, true)) {
+    header('Location: ../public/register.php?error=' . urlencode('Invalid gender selection'));
     exit;
 }
 
@@ -53,13 +72,16 @@ if ($res && $res->num_rows > 0) {
 $hash = password_hash($password, PASSWORD_DEFAULT);
 
 // Insert into Users
-$ins = $conn->prepare('INSERT INTO Users (name, username, email, password, password_plain, role, contact_number, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?)');
+$ins = $conn->prepare('INSERT INTO Users (name, username, email, password, password_plain, role, birthdate, gender, contact_number, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
 if (!$ins) {
     header('Location: ../public/register.php?error=' . urlencode('Server error'));
     exit;
 }
 $plain = $password; // NOTE: stored for testing only (db has `password_plain` column)
-$ins->bind_param('ssssssss', $name, $username, $email, $hash, $plain, $role, $contact, $address);
+// If birthdate or gender are empty strings, convert to NULL for DB insert
+$birthdate_param = ($birthdate === '') ? null : $birthdate;
+$gender_param = ($gender === '') ? null : $gender;
+$ins->bind_param('ssssssssss', $name, $username, $email, $hash, $plain, $role, $birthdate_param, $gender_param, $contact, $address);
 if (!$ins->execute()) {
     header('Location: ../public/register.php?error=' . urlencode('Could not create user'));
     exit;
