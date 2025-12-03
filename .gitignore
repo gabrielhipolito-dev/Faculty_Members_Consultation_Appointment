@@ -1,5 +1,5 @@
 # .gitignore file contents
 
 # Ignore the sample database file
-sampledb.sql
-sampledb_2.sql
+practice_db.sql
+main_db.sql
