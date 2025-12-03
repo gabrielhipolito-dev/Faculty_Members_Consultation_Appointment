@@ -121,40 +121,33 @@ if ($role === 'Student') {
     $course = trim($_POST['course'] ?? '');
     $year = trim($_POST['year_level'] ?? '1');
     $student_number = trim($_POST['student_number'] ?? '');
-
-    if ($profile_picture_path !== null) {
-        $s = $conn->prepare('INSERT INTO Student (user_id, course, year_level, student_number, profile_picture) VALUES (?, ?, ?, ?, ?)');
-        if ($s) {
-            $s->bind_param('issss', $user_id, $course, $year, $student_number, $profile_picture_path);
-            $s->execute();
-            $s->close();
-        }
-    } else {
-        $s = $conn->prepare('INSERT INTO Student (user_id, course, year_level, student_number) VALUES (?, ?, ?, ?)');
-        if ($s) {
-            $s->bind_param('isss', $user_id, $course, $year, $student_number);
-            $s->execute();
-            $s->close();
-        }
+    // Insert into Student (profile picture is now stored on Users table)
+    $s = $conn->prepare('INSERT INTO Student (user_id, course, year_level, student_number) VALUES (?, ?, ?, ?)');
+    if ($s) {
+        $s->bind_param('isss', $user_id, $course, $year, $student_number);
+        $s->execute();
+        $s->close();
     }
 } elseif ($role === 'Faculty') {
     $department = trim($_POST['department'] ?? '');
     $spec = trim($_POST['specialization'] ?? '');
     $faculty_number = trim($_POST['faculty_number'] ?? '');
-    if ($profile_picture_path !== null) {
-        $f = $conn->prepare('INSERT INTO Faculty (user_id, department, specialization, faculty_number, profile_picture) VALUES (?, ?, ?, ?, ?)');
-        if ($f) {
-            $f->bind_param('issss', $user_id, $department, $spec, $faculty_number, $profile_picture_path);
-            $f->execute();
-            $f->close();
-        }
-    } else {
-        $f = $conn->prepare('INSERT INTO Faculty (user_id, department, specialization, faculty_number) VALUES (?, ?, ?, ?)');
-        if ($f) {
-            $f->bind_param('isss', $user_id, $department, $spec, $faculty_number);
-            $f->execute();
-            $f->close();
-        }
+    // Insert into Faculty (profile picture is now stored on Users table)
+    $f = $conn->prepare('INSERT INTO Faculty (user_id, department, specialization, faculty_number) VALUES (?, ?, ?, ?)');
+    if ($f) {
+        $f->bind_param('isss', $user_id, $department, $spec, $faculty_number);
+        $f->execute();
+        $f->close();
+    }
+}
+
+// If upload succeeded, update Users.profile_picture to point to the uploaded file
+if ($profile_picture_path !== null) {
+    $u = $conn->prepare('UPDATE Users SET profile_picture = ? WHERE user_id = ?');
+    if ($u) {
+        $u->bind_param('si', $profile_picture_path, $user_id);
+        $u->execute();
+        $u->close();
     }
 }
 

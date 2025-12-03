@@ -24,6 +24,7 @@ $avatar = get_avatar_path($conn, $user);
         </div>
     </div>
 
+    <?php if (!empty($user) && strtolower($user['role'] ?? '') === 'admin'): ?>
     <div class="card">
         <div class="card-body">
             <h6>Create</h6>
@@ -31,4 +32,5 @@ $avatar = get_avatar_path($conn, $user);
             <a href="register.php" class="btn btn-primary">Create an account</a>
         </div>
     </div>
+    <?php endif; ?>
 </div>

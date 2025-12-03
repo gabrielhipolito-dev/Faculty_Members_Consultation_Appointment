@@ -10,7 +10,7 @@ if (!isset($_SESSION['user_id'])) {
 require_once __DIR__ . '/../config/db.php';
 $user = null;
 try {
-    $stmt = $conn->prepare('SELECT user_id, name, username, email, role, birthdate, gender, contact_number, address FROM Users WHERE user_id = ? LIMIT 1');
+    $stmt = $conn->prepare('SELECT user_id, name, username, email, role, birthdate, gender, contact_number, address, profile_picture FROM Users WHERE user_id = ? LIMIT 1');
     $stmt->bind_param('i', $_SESSION['user_id']);
     $stmt->execute();
     $res = $stmt->get_result();
