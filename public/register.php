@@ -94,7 +94,12 @@ include __DIR__ . '/../includes/header.php';
 		<div class="col-md-8">
 			<div class="card">
 				<div class="card-body">
-					<h3 class="card-title" id="manage"><?php echo ($mode === 'update') ? 'Update Account' : 'Create Account'; ?></h3>
+					<div class="d-flex justify-content-between align-items-center">
+						<h3 class="card-title mb-0" id="manage"><?php echo ($mode === 'update') ? 'Update Account' : 'Create Account'; ?></h3>
+						<?php if ($isAdmin): ?>
+							<a class="btn btn-outline-secondary btn-sm" href="dashboard_admin.php">Back to Admin Dashboard</a>
+						<?php endif; ?>
+					</div>
 
 					<?php if ($mode === 'update'): ?>
 						<div class="alert alert-info d-flex justify-content-between align-items-center">
