@@ -16,19 +16,7 @@
                 } else {
                     // fallback: show basic profile + quick actions
                     ?>
-                    <div class="card mb-3">
-                        <div class="card-body">
-                            <h5 class="card-title">Profile</h5>
-                            <?php if ($user): ?>
-                                <p class="mb-2"><strong><?php echo htmlspecialchars($user['name']); ?></strong></p>
-                                <p class="small text-muted mb-3"><?php echo htmlspecialchars($user['email']); ?></p>
-                                <button type="button" class="btn btn-sm btn-outline-primary" data-bs-toggle="modal" data-bs-target="#profileModal">View profile</button>
-                            <?php else: ?>
-                                <p class="text-muted">No profile information available.</p>
-                            <?php endif; ?>
-                        </div>
-                    </div>
-
+                    
                     <div class="card">
                         <div class="card-body">
                             <h5 class="card-title">Quick actions</h5>
