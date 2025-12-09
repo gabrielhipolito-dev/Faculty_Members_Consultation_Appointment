@@ -1,156 +1,102 @@
 <?php
-// actions/register_action.php
-// Simple registration handler. Inserts into Users and into Faculty or Student when needed.
-// Expects POST values as provided by `public/register.php`.
+session_start();
+include '../config/db.php'; // your database connection
 
-try {
-    require_once __DIR__ . '/../config/db.php';
-    // `config/db.php` initializes `$conn` or throws on failure
-} catch (Exception $e) {
-    header('Location: ../public/register.php?error=' . urlencode('Database error'));
-    exit;
-}
-
-if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    header('Location: ../public/register.php');
-    exit;
-}
-
+// 1. Get POST data and trim
 $name = trim($_POST['name'] ?? '');
 $username = trim($_POST['username'] ?? '');
 $email = trim($_POST['email'] ?? '');
-$password = $_POST['password'] ?? '';
-$role = $_POST['role'] ?? 'Student';
-$contact = trim($_POST['contact_number'] ?? '');
+$password = trim($_POST['password'] ?? '');
+$role = $_POST['role'] ?? '';
+$birthdate = $_POST['birthdate'] ?? null;
+$gender = $_POST['gender'] ?? null;
+$contact_number = trim($_POST['contact_number'] ?? '');
 $address = trim($_POST['address'] ?? '');
-// optional fields
-$birthdate = trim($_POST['birthdate'] ?? '');
-$gender = trim($_POST['gender'] ?? '');
+$profile_picture = $_FILES['profile_picture'] ?? null;
 
-if ($name === '' || $username === '' || $email === '' || $password === '') {
-    header('Location: ../public/register.php?error=' . urlencode('Please fill required fields'));
+// Role-specific fields
+$course = trim($_POST['course'] ?? '');
+$year_level = $_POST['year_level'] ?? null;
+$student_number = trim($_POST['student_number'] ?? '');
+
+$department = trim($_POST['department'] ?? '');
+$specialization = trim($_POST['specialization'] ?? '');
+$faculty_number = trim($_POST['faculty_number'] ?? '');
+
+// 2. Check required fields
+if (!$name || !$username || !$email || !$password || !$role) {
+    header("Location: ../public/register.php?error=Please fill in all required fields");
     exit;
 }
 
-// Enforce @gmail.com email addresses
-if (!preg_match('/@gmail\.com$/i', $email)) {
-    header('Location: ../public/register.php?error=' . urlencode('Email must be a @gmail.com address'));
+// 3. Check for duplicates in Users table
+$stmt = $conn->prepare("SELECT * FROM Users WHERE username = ? OR email = ? OR contact_number = ?");
+$stmt->bind_param("sss", $username, $email, $contact_number);
+$stmt->execute();
+$result = $stmt->get_result();
+if ($result->num_rows > 0) {
+    header("Location: ../public/register.php?error=Username, email, or contact number already exists");
     exit;
 }
 
-// Validate birthdate if provided (YYYY-MM-DD)
-if ($birthdate !== '') {
-    $d = DateTime::createFromFormat('Y-m-d', $birthdate);
-    if (!$d || $d->format('Y-m-d') !== $birthdate) {
-        header('Location: ../public/register.php?error=' . urlencode('Invalid birthdate format'));
+// 4. If Student, check student_number
+if ($role === 'Student' && $student_number) {
+    $stmt2 = $conn->prepare("SELECT * FROM Student WHERE student_number = ?");
+    $stmt2->bind_param("s", $student_number);
+    $stmt2->execute();
+    if ($stmt2->get_result()->num_rows > 0) {
+        header("Location: ../public/register.php?error=Student number already exists");
         exit;
     }
 }
 
-// Validate gender (optional)
-$allowedGenders = ['Male','Female','Other',''];
-if (!in_array($gender, $allowedGenders, true)) {
-    header('Location: ../public/register.php?error=' . urlencode('Invalid gender selection'));
-    exit;
-}
+// 5. Handle profile picture upload
+$profile_path = null;
+if ($profile_picture && $profile_picture['tmp_name']) {
+    $ext = pathinfo($profile_picture['name'], PATHINFO_EXTENSION);
+    $new_name = uniqid('profile_') . "." . $ext;
+    $upload_dir = __DIR__ . '/../uploads/';
+    if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
+    $destination = $upload_dir . $new_name;
 
-// Basic uniqueness check for username/email
-$check = $conn->prepare('SELECT user_id FROM Users WHERE username = ? OR email = ? LIMIT 1');
-if (!$check) {
-    header('Location: ../public/register.php?error=' . urlencode('Server error'));
-    exit;
-}
-$check->bind_param('ss', $username, $email);
-$check->execute();
-$res = $check->get_result();
-if ($res && $res->num_rows > 0) {
-    header('Location: ../public/register.php?error=' . urlencode('Username or email already taken'));
-    exit;
-}
-
-// Hash password
-$hash = password_hash($password, PASSWORD_DEFAULT);
-
-// Insert into Users
-$ins = $conn->prepare('INSERT INTO Users (name, username, email, password, password_plain, role, birthdate, gender, contact_number, address) VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)');
-if (!$ins) {
-    header('Location: ../public/register.php?error=' . urlencode('Server error'));
-    exit;
-}
-$plain = $password; // NOTE: stored for testing only (db has `password_plain` column)
-// If birthdate or gender are empty strings, convert to NULL for DB insert
-$birthdate_param = ($birthdate === '') ? null : $birthdate;
-$gender_param = ($gender === '') ? null : $gender;
-$ins->bind_param('ssssssssss', $name, $username, $email, $hash, $plain, $role, $birthdate_param, $gender_param, $contact, $address);
-if (!$ins->execute()) {
-    header('Location: ../public/register.php?error=' . urlencode('Could not create user'));
-    exit;
-}
-$user_id = $conn->insert_id;
-$ins->close();
-
-// Handle profile picture upload (optional). We'll save the file after we have $user_id.
-$profile_picture_path = null;
-if (isset($_FILES['profile_picture']) && isset($_FILES['profile_picture']['error']) && $_FILES['profile_picture']['error'] !== UPLOAD_ERR_NO_FILE) {
-    $file = $_FILES['profile_picture'];
-    if ($file['error'] === UPLOAD_ERR_OK) {
-        // Basic validation
-        $maxBytes = 2 * 1024 * 1024; // 2MB
-        if ($file['size'] <= $maxBytes) {
-            $tmp = $file['tmp_name'];
-            $info = @getimagesize($tmp);
-            $allowed = ['image/jpeg' => 'jpg', 'image/png' => 'png', 'image/gif' => 'gif'];
-            if ($info && isset($allowed[$info['mime']])) {
-                $ext = $allowed[$info['mime']];
-                $uploadDir = __DIR__ . '/../uploads/profile_pics/';
-                if (!is_dir($uploadDir)) @mkdir($uploadDir, 0755, true);
-                // unique filename
-                $saved = $user_id . '_' . time() . '_' . bin2hex(random_bytes(6)) . '.' . $ext;
-                $dest = $uploadDir . $saved;
-                if (@move_uploaded_file($tmp, $dest)) {
-                    // store relative path for DB
-                    $profile_picture_path = 'uploads/profile_pics/' . $saved;
-                }
-            }
-        }
+    if (move_uploaded_file($profile_picture['tmp_name'], $destination)) {
+        $profile_path = '/uploads/' . $new_name;
     }
 }
 
-// Role-specific inserts
+// 6. Hash password
+$hashed_password = password_hash($password, PASSWORD_BCRYPT);
+
+// 7. Insert into Users table (without password_plain)
+$stmt3 = $conn->prepare("INSERT INTO Users 
+(name, username, email, password, role, birthdate, gender, contact_number, address, profile_picture)
+VALUES (?, ?, ?, ?, ?, ?, ?, ?, ?, ?)");
+$stmt3->bind_param(
+    "ssssssssss",
+    $name, $username, $email, $hashed_password, $role,
+    $birthdate, $gender, $contact_number, $address, $profile_path
+);
+
+if (!$stmt3->execute()) {
+    header("Location: ../public/register.php?error=Failed to create user");
+    exit;
+}
+
+$user_id = $stmt3->insert_id;
+
+// 8. Insert role-specific table
 if ($role === 'Student') {
-    $course = trim($_POST['course'] ?? '');
-    $year = trim($_POST['year_level'] ?? '1');
-    $student_number = trim($_POST['student_number'] ?? '');
-    // Insert into Student (profile picture is now stored on Users table)
-    $s = $conn->prepare('INSERT INTO Student (user_id, course, year_level, student_number) VALUES (?, ?, ?, ?)');
-    if ($s) {
-        $s->bind_param('isss', $user_id, $course, $year, $student_number);
-        $s->execute();
-        $s->close();
-    }
-} elseif ($role === 'Faculty') {
-    $department = trim($_POST['department'] ?? '');
-    $spec = trim($_POST['specialization'] ?? '');
-    $faculty_number = trim($_POST['faculty_number'] ?? '');
-    // Insert into Faculty (profile picture is now stored on Users table)
-    $f = $conn->prepare('INSERT INTO Faculty (user_id, department, specialization, faculty_number) VALUES (?, ?, ?, ?)');
-    if ($f) {
-        $f->bind_param('isss', $user_id, $department, $spec, $faculty_number);
-        $f->execute();
-        $f->close();
-    }
+    $stmt4 = $conn->prepare("INSERT INTO Student (user_id, course, year_level, student_number) VALUES (?, ?, ?, ?)");
+    $stmt4->bind_param("isss", $user_id, $course, $year_level, $student_number);
+    $stmt4->execute();
 }
 
-// If upload succeeded, update Users.profile_picture to point to the uploaded file
-if ($profile_picture_path !== null) {
-    $u = $conn->prepare('UPDATE Users SET profile_picture = ? WHERE user_id = ?');
-    if ($u) {
-        $u->bind_param('si', $profile_picture_path, $user_id);
-        $u->execute();
-        $u->close();
-    }
+if ($role === 'Faculty') {
+    $stmt5 = $conn->prepare("INSERT INTO Faculty (user_id, department, specialization, faculty_number) VALUES (?, ?, ?, ?)");
+    $stmt5->bind_param("isss", $user_id, $department, $specialization, $faculty_number);
+    $stmt5->execute();
 }
 
-// Success
-header('Location: ../public/login.php?success=' . urlencode('Account created. You can log in now.'));
+// 9. Success
+header("Location: ../public/register.php?success=Account created successfully");
 exit;

@@ -18,7 +18,7 @@ if ($direct) {
             <!-- Promo area -->
             <div class="col-lg-7 promo-area d-flex flex-column justify-content-center">
                 <div class="px-5">
-                    <div class="logo">Galileo</div>
+                    <div class="logo">FACULTY MEMBERS CONSULTATION APPOINTMENT</div>
                     <h1>We Are The Best<br/>In Business</h1>
                     <p class="lead">
                         Elevate your workspace efficiency with Galileo's sleek and intuitive login page. 
