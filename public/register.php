@@ -9,14 +9,17 @@ include __DIR__ . '/../includes/header.php';
 			<div class="card">
 				<div class="card-body">
 					<h3 class="card-title">Create Account</h3>
+					
 					<?php if (isset($_GET['error'])): ?>
 						<div class="alert alert-danger"><?php echo htmlspecialchars($_GET['error']); ?></div>
 					<?php endif; ?>
+					
 					<?php if (isset($_GET['success'])): ?>
 						<div class="alert alert-success"><?php echo htmlspecialchars($_GET['success']); ?></div>
 					<?php endif; ?>
 
 					<form action="../actions/register_action.php" method="post" id="registerForm" enctype="multipart/form-data">
+						
 						<div class="mb-3">
 							<label class="form-label">Full name</label>
 							<input type="text" name="name" class="form-control" required>
@@ -41,8 +44,8 @@ include __DIR__ . '/../includes/header.php';
 							</div>
 							<div id="pwStrength" class="form-text mt-1"></div>
 						</div>
-            
-						 <div class="mb-3">
+
+						<div class="mb-3">
 							<label class="form-label">Contact number</label>
 							<input type="text" name="contact_number" class="form-control">
 						</div>
@@ -66,7 +69,6 @@ include __DIR__ . '/../includes/header.php';
 							<label class="form-label">Address</label>
 							<textarea name="address" class="form-control"></textarea>
 						</div>
-
 
 						<div class="mb-3">
 							<label class="form-label">Role</label>
@@ -132,90 +134,136 @@ include __DIR__ . '/../includes/header.php';
 </div>
 
 <script>
-		(function(){
-		const form = document.getElementById('registerForm');
-		const studentFields = document.getElementById('studentFields');
-		const facultyFields = document.getElementById('facultyFields');
-		const fileInput = document.getElementById('profile_picture');
-		const preview = document.getElementById('preview');
-		const emailEl = document.getElementById('email');
-		const emailError = document.getElementById('emailError');
-		const passwordEl = document.getElementById('password');
-		const togglePassword = document.getElementById('togglePassword');
-		const pwStrength = document.getElementById('pwStrength');
+(function() {
 
-		function update() {
-			const role = form.role.value;
-			studentFields.style.display = (role === 'Student') ? '' : 'none';
-			facultyFields.style.display = (role === 'Faculty') ? '' : 'none';
+	const form = document.getElementById('registerForm');
+	const studentFields = document.getElementById('studentFields');
+	const facultyFields = document.getElementById('facultyFields');
+	const fileInput = document.getElementById('profile_picture');
+	const preview = document.getElementById('preview');
+	const emailEl = document.getElementById('email');
+	const emailError = document.getElementById('emailError');
+	const passwordEl = document.getElementById('password');
+	const togglePassword = document.getElementById('togglePassword');
+	const pwStrength = document.getElementById('pwStrength');
+
+	// Show/hide student/faculty fields
+	function update() {
+		const role = form.role.value;
+		studentFields.style.display = (role === 'Student') ? '' : 'none';
+		facultyFields.style.display = (role === 'Faculty') ? '' : 'none';
+	}
+	form.addEventListener('change', update);
+
+	// Email live validation
+	emailEl.addEventListener('input', function() {
+		const v = emailEl.value.trim();
+		if (v === '') { emailError.style.display = 'none'; return; }
+		emailError.style.display = /@gmail\.com$/i.test(v) ? 'none' : 'block';
+	});
+
+	// Password strength
+	function calcStrength(pw) {
+		let score = 0;
+		if (pw.length >= 8) score++;
+		if (/[A-Z]/.test(pw)) score++;
+		if (/[0-9]/.test(pw)) score++;
+		if (/[^A-Za-z0-9]/.test(pw)) score++;
+		if (score <= 1) return { label: 'Weak', color: 'red' };
+		if (score === 2) return { label: 'Fair', color: '#e68a00' };
+		if (score === 3) return { label: 'Good', color: 'green' };
+		return { label: 'Strong', color: 'darkgreen' };
+	}
+
+	passwordEl.addEventListener('input', function () {
+		const s = calcStrength(passwordEl.value || '');
+		pwStrength.textContent = s.label;
+		pwStrength.style.color = s.color;
+	});
+
+	// Show/hide password
+	togglePassword.addEventListener('click', function () {
+		if (passwordEl.type === 'password') {
+			passwordEl.type = 'text';
+			togglePassword.textContent = 'Hide';
+		} else {
+			passwordEl.type = 'password';
+			togglePassword.textContent = 'Show';
+		}
+	});
+
+	// Image preview
+	fileInput.addEventListener('change', function(){
+		const f = fileInput.files && fileInput.files[0];
+		if (!f) { preview.style.display = 'none'; preview.src = ''; return; }
+		preview.src = URL.createObjectURL(f);
+		preview.style.display = '';
+	});
+
+	// FINAL VALIDATION ON SUBMIT
+	form.addEventListener('submit', function (e) {
+
+		// Email must end with @gmail.com
+		const emailValue = emailEl.value.trim();
+		if (!/@gmail\.com$/i.test(emailValue)) {
+			emailError.style.display = 'block';
+			emailEl.focus();
+			e.preventDefault();
+			return false;
 		}
 
-		// Email live validation (require @gmail.com)
-		if (emailEl) {
-			emailEl.addEventListener('input', function () {
-				const v = emailEl.value.trim();
-				if (v === '') { emailError.style.display = 'none'; return; }
-				if (/@gmail\.com$/i.test(v)) {
-					emailError.style.display = 'none';
-				} else {
-					emailError.style.display = 'block';
-				}
-			});
+		// Contact number must be numbers only
+		const contact = form.contact_number.value.trim();
+		if (contact !== "" && !/^[0-9]+$/.test(contact)) {
+			alert("Contact number must contain numbers only.");
+			form.contact_number.focus();
+			e.preventDefault();
+			return false;
 		}
 
-		// Password strength indicator
-		function calcStrength(pw) {
-			let score = 0;
-			if (pw.length >= 8) score++;
-			if (/[A-Z]/.test(pw)) score++;
-			if (/[0-9]/.test(pw)) score++;
-			if (/[^A-Za-z0-9]/.test(pw)) score++;
-			if (score <= 1) return { label: 'Weak', color: 'red' };
-			if (score === 2) return { label: 'Fair', color: '#e68a00' };
-			if (score === 3) return { label: 'Good', color: 'green' };
-			return { label: 'Strong', color: 'darkgreen' };
-		}
+		// Role specific validation
+		const role = form.role.value;
 
-		if (passwordEl) {
-			passwordEl.addEventListener('input', function () {
-				const s = calcStrength(passwordEl.value || '');
-				pwStrength.textContent = s.label;
-				pwStrength.style.color = s.color;
-			});
-		}
+		// Student validation
+		if (role === "Student") {
 
-		// Toggle password visibility
-		if (togglePassword && passwordEl) {
-			togglePassword.addEventListener('click', function () {
-				if (passwordEl.type === 'password') { passwordEl.type = 'text'; togglePassword.textContent = 'Hide'; }
-				else { passwordEl.type = 'password'; togglePassword.textContent = 'Show'; }
-			});
-		}
-
-		form.addEventListener('change', update);
-
-		// File preview
-		if (fileInput && preview) {
-			fileInput.addEventListener('change', function(e){
-				const f = fileInput.files && fileInput.files[0];
-				if (!f) { preview.style.display = 'none'; preview.src = ''; return; }
-				const url = URL.createObjectURL(f);
-				preview.src = url; preview.style.display = '';
-			});
-		}
-
-		// Validate on submit (server-side still enforced)
-		form.addEventListener('submit', function (e) {
-			const v = emailEl && emailEl.value.trim();
-			if (v && !/@gmail\.com$/i.test(v)) {
-				emailError.style.display = 'block';
-				emailEl.focus();
+			if (form.course.value.trim() === "") {
+				alert("Course is required for students.");
+				form.course.focus();
 				e.preventDefault();
 				return false;
 			}
-		});
-		update();
-	})();
+
+			if (form.student_number.value.trim() === "") {
+				alert("Student number is required.");
+				form.student_number.focus();
+				e.preventDefault();
+				return false;
+			}
+		}
+
+		// Faculty validation
+		if (role === "Faculty") {
+
+			if (form.department.value.trim() === "") {
+				alert("Department is required for faculty.");
+				form.department.focus();
+				e.preventDefault();
+				return false;
+			}
+
+			if (form.faculty_number.value.trim() === "") {
+				alert("Faculty number is required.");
+				form.faculty_number.focus();
+				e.preventDefault();
+				return false;
+			}
+		}
+
+	});
+
+	update(); // initialize UI
+})();
 </script>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
