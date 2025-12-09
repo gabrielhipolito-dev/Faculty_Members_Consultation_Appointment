@@ -2,10 +2,10 @@
 
 <?php include __DIR__ . '/../includes/header.php'; ?>
 
-<div class="container py-5">
-    <div class="row">
-        <?php include __DIR__ . '/../includes/partials/dashboard_sidebar.php'; ?>
+<?php include __DIR__ . '/../includes/partials/dashboard_sidebar.php'; ?>
 
+<div class="container py-5">
+    <div class="row justify-content-center">
         <div class="col-md-8">
             <?php
                 // Include role-specific dashboard partials from includes/dashboards/

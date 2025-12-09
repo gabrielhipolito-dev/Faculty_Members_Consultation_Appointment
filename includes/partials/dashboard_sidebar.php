@@ -1,36 +1,43 @@
 <?php
-// Sidebar partial: expects `$user` and `$conn` to be in scope
+// Top navbar partial: expects `$user` and `$conn` to be in scope
 require_once __DIR__ . '/../function.php';
 
 $avatar = get_avatar_path($conn, $user);
 ?>
-<div class="col-md-4">
-    <div class="card mb-3">
-        <div class="card-body">
-            <div class="text-center mb-2">
-                <img src="<?php echo htmlspecialchars($avatar); ?>" alt="Profile" class="rounded-circle" style="width:80px;height:80px;object-fit:cover;cursor:pointer;" data-bs-toggle="modal" data-bs-target="#profileModal">
-            </div>
-
-            <h5 class="card-title">Welcome</h5>
-            <p class="card-text">
-                <?php if ($user): ?>
-                    <strong><?php echo htmlspecialchars($user['name']); ?></strong><br>
-                    <small class="text-muted"><?php echo htmlspecialchars($user['role']); ?></small>
-                <?php else: ?>
-                    <em>User information not available</em>
+<nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-4">
+    <div class="container-fluid">
+        <span class="navbar-brand">Dashboard</span>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarNav">
+            <ul class="navbar-nav ms-auto align-items-center">
+                <?php if (!empty($user) && strtolower($user['role'] ?? '') === 'admin'): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="register.php">Create Account</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="manage_accounts.php">Manage Accounts</a>
+                    </li>
                 <?php endif; ?>
-            </p>
-            <a href="logout.php" class="btn btn-sm btn-outline-secondary">Sign out</a>
+                <li class="nav-item">
+                    <img src="<?php echo htmlspecialchars($avatar); ?>" alt="Profile" class="rounded-circle ms-3" style="width:40px;height:40px;object-fit:cover;cursor:pointer;" data-bs-toggle="modal" data-bs-target="#profileModal">
+                </li>
+                <li class="nav-item dropdown">
+                    <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
+                        <?php if ($user): ?>
+                            <?php echo htmlspecialchars($user['name']); ?>
+                        <?php else: ?>
+                            User
+                        <?php endif; ?>
+                    </a>
+                    <ul class="dropdown-menu dropdown-menu-end" aria-labelledby="userDropdown">
+                        <li><a class="dropdown-item" href="#" data-bs-toggle="modal" data-bs-target="#profileModal">View Profile</a></li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" href="logout.php">Sign Out</a></li>
+                    </ul>
+                </li>
+            </ul>
         </div>
     </div>
-
-    <?php if (!empty($user) && strtolower($user['role'] ?? '') === 'admin'): ?>
-    <div class="card">
-        <div class="card-body">
-            <h6>Create</h6>
-            <p class="small text-muted">Create accounts or open the registration page.</p>
-            <a href="register.php" class="btn btn-primary">Create an account</a>
-        </div>
-    </div>
-    <?php endif; ?>
-</div>
+</nav>

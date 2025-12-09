@@ -2,11 +2,11 @@
 
 <?php include __DIR__ . '/../includes/header.php'; ?>
 
+<?php include __DIR__ . '/../includes/partials/dashboard_sidebar.php'; ?>
+
 <div class="container py-5">
     <div class="row">
-        <?php include __DIR__ . '/../includes/partials/dashboard_sidebar.php'; ?>
-
-        <div class="col-md-8">
+        <div class="col-md-12">
             <?php
                 // Include role-specific dashboard partials from includes/dashboards/
                 $role = strtolower($user['role'] ?? '');
