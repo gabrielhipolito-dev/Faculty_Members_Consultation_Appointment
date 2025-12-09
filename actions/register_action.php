@@ -55,13 +55,16 @@ $profile_path = null;
 if ($profile_picture && $profile_picture['tmp_name']) {
     $ext = pathinfo($profile_picture['name'], PATHINFO_EXTENSION);
     $new_name = uniqid('profile_') . "." . $ext;
-    $upload_dir = __DIR__ . '/../uploads/';
+    $upload_dir = __DIR__ . '/../uploads/profile_pics/';
     if (!is_dir($upload_dir)) mkdir($upload_dir, 0755, true);
     $destination = $upload_dir . $new_name;
 
     if (move_uploaded_file($profile_picture['tmp_name'], $destination)) {
-        $profile_path = '/uploads/' . $new_name;
+        $profile_path = '/uploads/profile_pics/' . $new_name;
     }
+} else {
+    // Set default image if no picture uploaded
+    $profile_path = '/uploads/profile_pics/default_image.png';
 }
 
 // 6. Hash password
