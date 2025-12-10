@@ -12,17 +12,15 @@ $avatar = get_avatar_path($conn, $user);
         </button>
         <div class="collapse navbar-collapse" id="navbarNav">
             <ul class="navbar-nav ms-auto align-items-center">
-                <?php if (!empty($user) && strtolower($user['role'] ?? '') === 'admin'): ?>
-                    <li class="nav-item">
-                        <a class="nav-link" href="register.php">Create Account</a>
-                    </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="manage_accounts.php">Manage Accounts</a>
-                    </li>
-                <?php endif; ?>
+                
                 <li class="nav-item">
                     <img src="<?php echo htmlspecialchars($avatar); ?>" alt="Profile" class="rounded-circle ms-3" style="width:40px;height:40px;object-fit:cover;cursor:pointer;" data-bs-toggle="modal" data-bs-target="#profileModal">
                 </li>
+                <?php if (!empty($user) && strtolower($user['role'] ?? '') === 'admin'): ?>
+                    <li class="nav-item">
+                        <a class="nav-link" href="register.php">Manage Accounts</a>
+                    </li>
+                <?php endif; ?>
                 <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" id="userDropdown" role="button" data-bs-toggle="dropdown">
                         <?php if ($user): ?>
