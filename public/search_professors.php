@@ -1,5 +1,7 @@
 <?php
 // Include database logic for professors
+include __DIR__ . '/../actions/load_user.php';
+include __DIR__ . '/../actions/dashboard_student_handler.php';
 include __DIR__ . '/../actions/get_professors.php';
 
 include __DIR__ . '/../includes/header.php';
@@ -10,7 +12,10 @@ include __DIR__ . '/../includes/partials/dashboard_sidebar.php';
     <!-- Header Section -->
     <div class="container mb-5">
         <div class="row align-items-center">
-            <div class="col-md-6">
+            <div class="col-md-8">
+                <a href="dashboard_student.php" class="btn btn-light mb-3" style="border-radius: 8px;">
+                    ← Back to Dashboard
+                </a>
                 <h1 class="text-white mb-2" style="font-size: 2.5rem; font-weight: 700;">Search Doctor, Make an Appointment</h1>
                 <p class="text-white-50">Browse our team of consultants, check their specialization & availability</p>
             </div>
