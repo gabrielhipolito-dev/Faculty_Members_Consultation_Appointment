@@ -164,8 +164,8 @@ include __DIR__ . '/../includes/header.php';
 
 						<div class="mb-3">
 							<label class="form-label">Gender</label>
-							<select name="gender" class="form-select">
-								<option value="">-- Select gender (optional) --</option>
+							<select name="gender" class="form-select" required>
+								<option value="">-- Select gender --</option>
 								<option value="Male" <?php echo ($formData['gender'] === 'Male') ? 'selected' : ''; ?>>Male</option>
 								<option value="Female" <?php echo ($formData['gender'] === 'Female') ? 'selected' : ''; ?>>Female</option>
 								<option value="Other" <?php echo ($formData['gender'] === 'Other') ? 'selected' : ''; ?>>Other</option>
@@ -190,7 +190,61 @@ include __DIR__ . '/../includes/header.php';
 						<div id="studentFields">
 							<div class="mb-3">
 								<label class="form-label">Course</label>
-								<input type="text" name="course" class="form-control" value="<?php echo htmlspecialchars($formData['course']); ?>">
+								<select name="course" class="form-select">
+									<option value="">-- Select a course --</option>
+									<optgroup label="College of Computing and Information Technology (CCIT)">
+										<option value="BS Computer Science" <?php echo ($formData['course'] === 'BS Computer Science') ? 'selected' : ''; ?>>BS Computer Science</option>
+										<option value="BS Information Technology" <?php echo ($formData['course'] === 'BS Information Technology') ? 'selected' : ''; ?>>BS Information Technology</option>
+										<option value="BS Information Systems" <?php echo ($formData['course'] === 'BS Information Systems') ? 'selected' : ''; ?>>BS Information Systems</option>
+										<option value="Dual-degree: BS Computer Science + BS Information Engineering" <?php echo ($formData['course'] === 'Dual-degree: BS Computer Science + BS Information Engineering') ? 'selected' : ''; ?>>Dual-degree: BS Computer Science + BS Information Engineering</option>
+									</optgroup>
+									<optgroup label="College of Engineering">
+										<option value="BS Chemical Engineering" <?php echo ($formData['course'] === 'BS Chemical Engineering') ? 'selected' : ''; ?>>BS Chemical Engineering</option>
+										<option value="BS Chemical Process Technology" <?php echo ($formData['course'] === 'BS Chemical Process Technology') ? 'selected' : ''; ?>>BS Chemical Process Technology</option>
+										<option value="BS Civil Engineering" <?php echo ($formData['course'] === 'BS Civil Engineering') ? 'selected' : ''; ?>>BS Civil Engineering</option>
+										<option value="BS Computer Engineering" <?php echo ($formData['course'] === 'BS Computer Engineering') ? 'selected' : ''; ?>>BS Computer Engineering</option>
+										<option value="BS Electrical Engineering" <?php echo ($formData['course'] === 'BS Electrical Engineering') ? 'selected' : ''; ?>>BS Electrical Engineering</option>
+										<option value="BS Electronics/Electronics & Communications Engineering" <?php echo ($formData['course'] === 'BS Electronics/Electronics & Communications Engineering') ? 'selected' : ''; ?>>BS Electronics/Electronics & Communications Engineering</option>
+										<option value="BS Geology" <?php echo ($formData['course'] === 'BS Geology') ? 'selected' : ''; ?>>BS Geology</option>
+										<option value="BS Industrial Engineering" <?php echo ($formData['course'] === 'BS Industrial Engineering') ? 'selected' : ''; ?>>BS Industrial Engineering</option>
+										<option value="BS Mechanical Engineering" <?php echo ($formData['course'] === 'BS Mechanical Engineering') ? 'selected' : ''; ?>>BS Mechanical Engineering (including Mechatronics major/track)</option>
+										<option value="BS Mining Engineering" <?php echo ($formData['course'] === 'BS Mining Engineering') ? 'selected' : ''; ?>>BS Mining Engineering</option>
+										<option value="BS Petroleum Engineering" <?php echo ($formData['course'] === 'BS Petroleum Engineering') ? 'selected' : ''; ?>>BS Petroleum Engineering</option>
+									</optgroup>
+									<optgroup label="College of Science">
+										<option value="BS Biology" <?php echo ($formData['course'] === 'BS Biology') ? 'selected' : ''; ?>>BS Biology</option>
+										<option value="BS Chemistry" <?php echo ($formData['course'] === 'BS Chemistry') ? 'selected' : ''; ?>>BS Chemistry</option>
+										<option value="BS Psychology" <?php echo ($formData['course'] === 'BS Psychology') ? 'selected' : ''; ?>>BS Psychology</option>
+									</optgroup>
+									<optgroup label="College of Business Administration">
+										<option value="BS Accountancy" <?php echo ($formData['course'] === 'BS Accountancy') ? 'selected' : ''; ?>>BS Accountancy</option>
+										<option value="BS Business Administration - Financial Management" <?php echo ($formData['course'] === 'BS Business Administration - Financial Management') ? 'selected' : ''; ?>>BS Business Administration - Financial Management</option>
+										<option value="BS Business Administration - Marketing Management" <?php echo ($formData['course'] === 'BS Business Administration - Marketing Management') ? 'selected' : ''; ?>>BS Business Administration - Marketing Management</option>
+										<option value="BS Business Administration - Operations Management" <?php echo ($formData['course'] === 'BS Business Administration - Operations Management') ? 'selected' : ''; ?>>BS Business Administration - Operations Management</option>
+										<option value="BS Customs Administration" <?php echo ($formData['course'] === 'BS Customs Administration') ? 'selected' : ''; ?>>BS Customs Administration</option>
+										<option value="BS Hospitality Management" <?php echo ($formData['course'] === 'BS Hospitality Management') ? 'selected' : ''; ?>>BS Hospitality Management</option>
+									</optgroup>
+									<optgroup label="College of Education and Liberal Arts">
+										<option value="Bachelor of Elementary Education" <?php echo ($formData['course'] === 'Bachelor of Elementary Education') ? 'selected' : ''; ?>>Bachelor of Elementary Education</option>
+										<option value="Bachelor of Secondary Education" <?php echo ($formData['course'] === 'Bachelor of Secondary Education') ? 'selected' : ''; ?>>Bachelor of Secondary Education</option>
+										<option value="Bachelor of Physical Education / Exercise & Sports" <?php echo ($formData['course'] === 'Bachelor of Physical Education / Exercise & Sports') ? 'selected' : ''; ?>>Bachelor of Physical Education / Exercise & Sports</option>
+										<option value="BA in Communication" <?php echo ($formData['course'] === 'BA in Communication') ? 'selected' : ''; ?>>BA in Communication</option>
+										<option value="BA in Political Science" <?php echo ($formData['course'] === 'BA in Political Science') ? 'selected' : ''; ?>>BA in Political Science</option>
+										<option value="BA in Philosophy" <?php echo ($formData['course'] === 'BA in Philosophy') ? 'selected' : ''; ?>>BA in Philosophy</option>
+									</optgroup>
+									<optgroup label="College of Architecture">
+										<option value="BS Architecture" <?php echo ($formData['course'] === 'BS Architecture') ? 'selected' : ''; ?>>BS Architecture</option>
+									</optgroup>
+									<optgroup label="College of Nursing">
+										<option value="BS Nursing" <?php echo ($formData['course'] === 'BS Nursing') ? 'selected' : ''; ?>>BS Nursing</option>
+									</optgroup>
+									<optgroup label="College of Pharmacy">
+										<option value="BS Pharmacy" <?php echo ($formData['course'] === 'BS Pharmacy') ? 'selected' : ''; ?>>BS Pharmacy</option>
+									</optgroup>
+									<optgroup label="College of Law">
+										<option value="Bachelor of Laws (LLB)" <?php echo ($formData['course'] === 'Bachelor of Laws (LLB)') ? 'selected' : ''; ?>>Bachelor of Laws (LLB)</option>
+									</optgroup>
+								</select>
 							</div>
 							<div class="mb-3">
 								<label class="form-label">Year level</label>

@@ -141,8 +141,8 @@ if ($profile_picture && isset($profile_picture['tmp_name']) && $profile_picture[
     if (move_uploaded_file($profile_picture['tmp_name'], $destination)) {
         $profile_path = '/uploads/profile_pics/' . $new_name;
     }
-}
-if (!$profile_path) {
+} elseif (!$profile_path) {
+    // Only set default if no file was chosen and no existing picture
     $profile_path = '/uploads/profile_pics/default_image.png';
 }
 
