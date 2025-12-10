@@ -264,7 +264,36 @@ include __DIR__ . '/../includes/header.php';
 						<div id="facultyFields" style="display:none;">
 							<div class="mb-3">
 								<label class="form-label">Department</label>
-								<input type="text" name="department" class="form-control" value="<?php echo htmlspecialchars($formData['department']); ?>">
+								<select name="department" class="form-select">
+									<option value="">-- Select a department --</option>
+									<optgroup label="College of Computing and Information Technology (CCIT)">
+										<option value="College of Computing and Information Technology (CCIT)" <?php echo ($formData['department'] === 'College of Computing and Information Technology (CCIT)') ? 'selected' : ''; ?>>College of Computing and Information Technology (CCIT)</option>
+									</optgroup>
+									<optgroup label="College of Engineering">
+										<option value="College of Engineering" <?php echo ($formData['department'] === 'College of Engineering') ? 'selected' : ''; ?>>College of Engineering</option>
+									</optgroup>
+									<optgroup label="College of Science">
+										<option value="College of Science" <?php echo ($formData['department'] === 'College of Science') ? 'selected' : ''; ?>>College of Science</option>
+									</optgroup>
+									<optgroup label="College of Business Administration">
+										<option value="College of Business Administration" <?php echo ($formData['department'] === 'College of Business Administration') ? 'selected' : ''; ?>>College of Business Administration</option>
+									</optgroup>
+									<optgroup label="College of Education and Liberal Arts">
+										<option value="College of Education and Liberal Arts" <?php echo ($formData['department'] === 'College of Education and Liberal Arts') ? 'selected' : ''; ?>>College of Education and Liberal Arts</option>
+									</optgroup>
+									<optgroup label="College of Architecture">
+										<option value="College of Architecture" <?php echo ($formData['department'] === 'College of Architecture') ? 'selected' : ''; ?>>College of Architecture</option>
+									</optgroup>
+									<optgroup label="College of Nursing">
+										<option value="College of Nursing" <?php echo ($formData['department'] === 'College of Nursing') ? 'selected' : ''; ?>>College of Nursing</option>
+									</optgroup>
+									<optgroup label="College of Pharmacy">
+										<option value="College of Pharmacy" <?php echo ($formData['department'] === 'College of Pharmacy') ? 'selected' : ''; ?>>College of Pharmacy</option>
+									</optgroup>
+									<optgroup label="College of Law">
+										<option value="College of Law" <?php echo ($formData['department'] === 'College of Law') ? 'selected' : ''; ?>>College of Law</option>
+									</optgroup>
+								</select>
 							</div>
 							<div class="mb-3">
 								<label class="form-label">Specialization</label>
