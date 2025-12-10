@@ -2,6 +2,11 @@
 // Top navbar partial: expects `$user` and `$conn` to be in scope
 require_once __DIR__ . '/../function.php';
 
+// Ensure $user is defined
+if (!isset($user)) {
+    $user = null;
+}
+
 $avatar = get_avatar_path($conn, $user);
 ?>
 <nav class="navbar navbar-expand-lg navbar-light bg-light border-bottom mb-4">
