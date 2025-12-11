@@ -95,10 +95,23 @@ include __DIR__ . '/../includes/partials/dashboard_sidebar.php';
                             <!-- Professor Photo -->
                             <div style="height: 250px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); overflow: hidden; display: flex; align-items: center; justify-content: center; position: relative;">
                                 <?php
-                                $profilePath = $prof['profile_picture'] ?? '/uploads/profile_pics/default_image.png';
-                                $fullPath = __DIR__ . '/..' . ltrim($profilePath, '/');
+                                // Handle profile picture path
+                                $profilePicture = $prof['profile_picture'];
+                                if (empty($profilePicture)) {
+                                    $profilePath = '../uploads/profile_pics/default_image.png';
+                                } else {
+                                    // If path starts with /, convert to relative path
+                                    if (strpos($profilePicture, '/') === 0) {
+                                        $profilePath = '..' . $profilePicture;
+                                    } else {
+                                        $profilePath = $profilePicture;
+                                    }
+                                }
+                                
+                                // Check if file exists, use default if not
+                                $fullPath = __DIR__ . '/' . $profilePath;
                                 if (!file_exists($fullPath)) {
-                                    $profilePath = '/uploads/profile_pics/default_image.png';
+                                    $profilePath = '../uploads/profile_pics/default_image.png';
                                 }
                                 ?>
                                 <img src="<?php echo htmlspecialchars($profilePath); ?>" alt="<?php echo htmlspecialchars($prof['name']); ?>" style="width: 100%; height: 100%; object-fit: cover;">
