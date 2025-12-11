@@ -1,5 +1,33 @@
 <?php
 // Profile modal expects $user to be defined in the including file
+// Normalize profile image path to uploads with fallback
+function modalResolveProfileImage($rawPath) {
+    // Return paths relative to files that include this modal (typically in /public), so prepend ..
+    $prefix = '..';
+    $default = $prefix . '/uploads/profile_pics/default_image.png';
+    if (!$rawPath || trim($rawPath) === '') return $default;
+
+    $path = str_replace('\\', '/', trim($rawPath));
+    if ($path[0] !== '/') {
+        $path = '/' . $path;
+    }
+
+    $root = dirname(__DIR__); // project root
+    $fullPath = $root . $path;
+    if (file_exists($fullPath) && is_file($fullPath)) {
+        return $prefix . $path;
+    }
+
+    // fallback to uploads/profile_pics basename if only filename exists
+    $base = basename($path);
+    $alt = '/uploads/profile_pics/' . $base;
+    if (file_exists($root . $alt) && is_file($root . $alt)) {
+        return $prefix . $alt;
+    }
+
+    return $default;
+}
+
 // Get role-specific data if not already loaded
 $role_data = null;
 if (!empty($user) && isset($conn)) {
@@ -46,7 +74,7 @@ if (!empty($user) && isset($conn)) {
             <div class="modal-body">
                 <div class="row">
                     <div class="col-md-4 text-center">
-                        <img src="<?php echo htmlspecialchars($user['profile_picture'] ?? '/uploads/profile_pics/default_image.png'); ?>" alt="Profile" class="rounded-circle mb-3" style="width:160px;height:160px;object-fit:cover;">
+                        <img src="<?php echo htmlspecialchars(modalResolveProfileImage($user['profile_picture'] ?? '')); ?>" alt="Profile" class="rounded-circle mb-3" style="width:160px;height:160px;object-fit:cover;">
                     </div>
                     <div class="col-md-8">
                         <?php if (!empty($user)): ?>
