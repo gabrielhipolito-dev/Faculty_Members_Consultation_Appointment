@@ -59,16 +59,20 @@ function getStudentUpcomingAppointments($studentId, $limit = 5) {
             SELECT 
                 a.appointment_id,
                 a.appointment_date,
-                a.appointment_time,
                 a.status,
+                av.start_time,
+                av.end_time,
+                av.day_of_week,
                 u.name as professor_name,
                 u.profile_picture
             FROM Appointments a
-            JOIN Users u ON a.professor_id = u.user_id
+            INNER JOIN Availability av ON a.availability_id = av.availability_id
+            INNER JOIN Faculty f ON a.faculty_id = f.faculty_id
+            INNER JOIN Users u ON f.user_id = u.user_id
             WHERE a.student_id = ? 
-            AND a.appointment_date >= CURDATE()
-            AND a.status IN ("pending", "confirmed")
-            ORDER BY a.appointment_date ASC, a.appointment_time ASC
+                AND a.appointment_date >= CURDATE()
+                AND a.status IN ("Pending", "Approved")
+            ORDER BY a.appointment_date ASC, av.start_time ASC
             LIMIT ?
         ');
         
@@ -144,7 +148,7 @@ function getStudentStats($studentId) {
         $stmt = $conn->prepare('
             SELECT COUNT(*) as count FROM Appointments
             WHERE student_id = ? AND appointment_date >= CURDATE() 
-            AND status IN ("pending", "confirmed")
+            AND status IN ("Pending", "Approved")
         ');
         $stmt->bind_param('i', $studentId);
         $stmt->execute();
@@ -156,7 +160,7 @@ function getStudentStats($studentId) {
         // Completed appointments
         $stmt = $conn->prepare('
             SELECT COUNT(*) as count FROM Appointments
-            WHERE student_id = ? AND status = "completed"
+            WHERE student_id = ? AND status = "Approved" AND appointment_date < CURDATE()
         ');
         $stmt->bind_param('i', $studentId);
         $stmt->execute();
