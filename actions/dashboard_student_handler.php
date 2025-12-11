@@ -106,9 +106,14 @@ function getStudentFeaturedProfessors($studentId, $limit = 6) {
                 u.name,
                 u.email,
                 u.profile_picture,
-                (SELECT COUNT(*) FROM Appointments WHERE professor_id = u.user_id AND student_id = ?) as interaction_count
+                f.department,
+                f.specialization,
+                (SELECT COUNT(*) FROM Appointments a 
+                 INNER JOIN Student s ON a.student_id = s.student_id
+                 WHERE a.faculty_id = f.faculty_id AND s.user_id = ?) as interaction_count
             FROM Users u
-            WHERE u.role = "faculty"
+            INNER JOIN Faculty f ON u.user_id = f.user_id
+            WHERE u.role = "Faculty" AND u.status = "Active"
             ORDER BY u.name ASC
             LIMIT ?
         ');

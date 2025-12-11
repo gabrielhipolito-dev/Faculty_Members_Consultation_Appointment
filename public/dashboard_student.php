@@ -36,7 +36,7 @@
                     <p class="text-muted small mb-4">Book your first consultation with a professor</p>
                     
                     <?php
-                        $professors = getStudentFeaturedProfessors($user['user_id'], 6);
+                        $professors = getStudentFeaturedProfessors($user['user_id'], 2);
                         if (!empty($professors)):
                     ?>
                         <div class="row">
@@ -45,10 +45,10 @@
                                     <div class="card h-100 border-0" style="border-radius: 12px; overflow: hidden;">
                                         <div style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); height: 80px;"></div>
                                         <div class="card-body text-center" style="margin-top: -40px; position: relative; z-index: 1;">
-                                            <img src="<?php echo htmlspecialchars(getStudentProfileImage($prof['profile_picture'])); ?>" alt="Professor" class="rounded-circle mb-3" width="80" height="80" style="border: 4px solid white; object-fit: cover; background-color: #f0f0f0;">
+                                            <img src="<?php echo '../' . ltrim(htmlspecialchars(getStudentProfileImage($prof['profile_picture'])), '/'); ?>" alt="Professor" class="rounded-circle mb-3" width="80" height="80" style="border: 4px solid white; object-fit: cover; background-color: #f0f0f0;">
                                             <h6 class="mb-1 fw-600"><?php echo htmlspecialchars($prof['name']); ?></h6>
-                                            <small class="text-muted d-block mb-3">Specialization</small>
-                                            <p class="small text-muted mb-3">Available Mon-Fri</p>
+                                            <small class="text-muted d-block mb-3"><?php echo htmlspecialchars($prof['specialization'] ?? 'Specialization'); ?></small>
+                                            <p class="small text-muted mb-3"><?php echo htmlspecialchars($prof['department'] ?? 'Department'); ?></p>
                                             <a href="search_professors.php?id=<?php echo $prof['user_id']; ?>" class="btn btn-sm btn-primary" style="border-radius: 6px;">Book Now</a>
                                         </div>
                                     </div>
