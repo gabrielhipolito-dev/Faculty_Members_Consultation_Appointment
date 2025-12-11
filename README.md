@@ -116,7 +116,7 @@ The application is now live on your local server.
 
 * Open your web browser and navigate to:
     ```
-    http://localhost/Faculty_Members_Consultation_Appointment/
+    http://localhost/Faculty_Members_Consultation_Appointment/public
     ```
 * You can now log in using the username `admin` and password `admin123`.
 
