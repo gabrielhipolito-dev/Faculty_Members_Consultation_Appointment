@@ -154,7 +154,13 @@ include __DIR__ . '/../includes/header.php';
 
 						<div class="mb-3">
 							<label class="form-label">Contact number</label>
-							<input type="text" name="contact_number" class="form-control" value="<?php echo htmlspecialchars($formData['contact_number']); ?>">
+							<div class="input-group">
+								<span class="input-group-text">+63</span>
+								<input type="text" name="contact_number" id="contact_number" class="form-control" placeholder="9XXXXXXXXX" value="<?php echo htmlspecialchars($formData['contact_number']); ?>" maxlength="10">
+								<span class="input-group-text" id="phoneValidation" style="color: #999;">⚪</span>
+							</div>
+							<div class="form-text small" id="phoneHint">Format: 10 digits (9XXXXXXXXX)</div>
+							<div class="form-text text-danger" id="phoneError" style="display:none">Contact number must be exactly 10 digits.</div>
 						</div>
 
 						<div class="mb-3">
@@ -264,7 +270,7 @@ include __DIR__ . '/../includes/header.php';
 						<div id="facultyFields" style="display:none;">
 							<div class="mb-3">
 								<label class="form-label">Department</label>
-								<select name="department" class="form-select">
+								<select name="department" id="department" class="form-select">
 									<option value="">-- Select a department --</option>
 									<optgroup label="College of Computing and Information Technology (CCIT)">
 										<option value="College of Computing and Information Technology (CCIT)" <?php echo ($formData['department'] === 'College of Computing and Information Technology (CCIT)') ? 'selected' : ''; ?>>College of Computing and Information Technology (CCIT)</option>
@@ -297,7 +303,128 @@ include __DIR__ . '/../includes/header.php';
 							</div>
 							<div class="mb-3">
 								<label class="form-label">Specialization</label>
-								<input type="text" name="specialization" class="form-control" value="<?php echo htmlspecialchars($formData['specialization']); ?>">
+								<select name="specialization" id="specialization" class="form-select">
+									<option value="">-- Select a specialization --</option>
+									<optgroup label="🖥️ College of Computing and Information Technology (CCIT)" data-department="College of Computing and Information Technology (CCIT)">
+										<option value="Programming" <?php echo ($formData['specialization'] === 'Programming') ? 'selected' : ''; ?>>Programming</option>
+										<option value="Data Structures" <?php echo ($formData['specialization'] === 'Data Structures') ? 'selected' : ''; ?>>Data Structures</option>
+										<option value="Algorithms" <?php echo ($formData['specialization'] === 'Algorithms') ? 'selected' : ''; ?>>Algorithms</option>
+										<option value="Operating Systems" <?php echo ($formData['specialization'] === 'Operating Systems') ? 'selected' : ''; ?>>Operating Systems</option>
+										<option value="Computer Networks" <?php echo ($formData['specialization'] === 'Computer Networks') ? 'selected' : ''; ?>>Computer Networks</option>
+										<option value="Software Engineering" <?php echo ($formData['specialization'] === 'Software Engineering') ? 'selected' : ''; ?>>Software Engineering</option>
+										<option value="Database Systems" <?php echo ($formData['specialization'] === 'Database Systems') ? 'selected' : ''; ?>>Database Systems</option>
+										<option value="Web Development" <?php echo ($formData['specialization'] === 'Web Development') ? 'selected' : ''; ?>>Web Development</option>
+										<option value="Mobile App Development" <?php echo ($formData['specialization'] === 'Mobile App Development') ? 'selected' : ''; ?>>Mobile App Development</option>
+										<option value="Cybersecurity" <?php echo ($formData['specialization'] === 'Cybersecurity') ? 'selected' : ''; ?>>Cybersecurity</option>
+										<option value="Machine Learning" <?php echo ($formData['specialization'] === 'Machine Learning') ? 'selected' : ''; ?>>Machine Learning</option>
+										<option value="Artificial Intelligence" <?php echo ($formData['specialization'] === 'Artificial Intelligence') ? 'selected' : ''; ?>>Artificial Intelligence</option>
+										<option value="Cloud Computing" <?php echo ($formData['specialization'] === 'Cloud Computing') ? 'selected' : ''; ?>>Cloud Computing</option>
+										<option value="Computer Architecture" <?php echo ($formData['specialization'] === 'Computer Architecture') ? 'selected' : ''; ?>>Computer Architecture</option>
+										<option value="Human-Computer Interaction" <?php echo ($formData['specialization'] === 'Human-Computer Interaction') ? 'selected' : ''; ?>>Human-Computer Interaction</option>
+										<option value="Data Analytics" <?php echo ($formData['specialization'] === 'Data Analytics') ? 'selected' : ''; ?>>Data Analytics</option>
+										<option value="Systems Analysis & Design" <?php echo ($formData['specialization'] === 'Systems Analysis & Design') ? 'selected' : ''; ?>>Systems Analysis & Design</option>
+										<option value="IT Infrastructure" <?php echo ($formData['specialization'] === 'IT Infrastructure') ? 'selected' : ''; ?>>IT Infrastructure</option>
+										<option value="DevOps" <?php echo ($formData['specialization'] === 'DevOps') ? 'selected' : ''; ?>>DevOps</option>
+										<option value="Multimedia Systems" <?php echo ($formData['specialization'] === 'Multimedia Systems') ? 'selected' : ''; ?>>Multimedia Systems</option>
+									</optgroup>
+									<optgroup label="⚙️ College of Engineering" data-department="College of Engineering">
+										<option value="Calculus" <?php echo ($formData['specialization'] === 'Calculus') ? 'selected' : ''; ?>>Calculus</option>
+										<option value="Engineering Mathematics" <?php echo ($formData['specialization'] === 'Engineering Mathematics') ? 'selected' : ''; ?>>Engineering Mathematics</option>
+										<option value="Thermodynamics" <?php echo ($formData['specialization'] === 'Thermodynamics') ? 'selected' : ''; ?>>Thermodynamics</option>
+										<option value="Fluid Mechanics" <?php echo ($formData['specialization'] === 'Fluid Mechanics') ? 'selected' : ''; ?>>Fluid Mechanics</option>
+										<option value="Strength of Materials" <?php echo ($formData['specialization'] === 'Strength of Materials') ? 'selected' : ''; ?>>Strength of Materials</option>
+										<option value="Structural Analysis" <?php echo ($formData['specialization'] === 'Structural Analysis') ? 'selected' : ''; ?>>Structural Analysis</option>
+										<option value="Circuit Analysis" <?php echo ($formData['specialization'] === 'Circuit Analysis') ? 'selected' : ''; ?>>Circuit Analysis</option>
+										<option value="Electronics" <?php echo ($formData['specialization'] === 'Electronics') ? 'selected' : ''; ?>>Electronics</option>
+										<option value="Digital Systems" <?php echo ($formData['specialization'] === 'Digital Systems') ? 'selected' : ''; ?>>Digital Systems</option>
+										<option value="Microprocessors" <?php echo ($formData['specialization'] === 'Microprocessors') ? 'selected' : ''; ?>>Microprocessors</option>
+										<option value="Embedded Systems" <?php echo ($formData['specialization'] === 'Embedded Systems') ? 'selected' : ''; ?>>Embedded Systems</option>
+										<option value="Signal Processing" <?php echo ($formData['specialization'] === 'Signal Processing') ? 'selected' : ''; ?>>Signal Processing</option>
+										<option value="Power Systems" <?php echo ($formData['specialization'] === 'Power Systems') ? 'selected' : ''; ?>>Power Systems</option>
+										<option value="Electrical Machines" <?php echo ($formData['specialization'] === 'Electrical Machines') ? 'selected' : ''; ?>>Electrical Machines</option>
+										<option value="Control Systems" <?php echo ($formData['specialization'] === 'Control Systems') ? 'selected' : ''; ?>>Control Systems</option>
+										<option value="Manufacturing Processes" <?php echo ($formData['specialization'] === 'Manufacturing Processes') ? 'selected' : ''; ?>>Manufacturing Processes</option>
+										<option value="Robotics" <?php echo ($formData['specialization'] === 'Robotics') ? 'selected' : ''; ?>>Robotics</option>
+										<option value="Automotive Engineering" <?php echo ($formData['specialization'] === 'Automotive Engineering') ? 'selected' : ''; ?>>Automotive Engineering</option>
+										<option value="Mine Design & Safety" <?php echo ($formData['specialization'] === 'Mine Design & Safety') ? 'selected' : ''; ?>>Mine Design & Safety</option>
+										<option value="Industrial Systems & Operations Research" <?php echo ($formData['specialization'] === 'Industrial Systems & Operations Research') ? 'selected' : ''; ?>>Industrial Systems & Operations Research</option>
+									</optgroup>
+									<optgroup label="🏛️ College of Architecture" data-department="College of Architecture">
+										<option value="Architectural Design" <?php echo ($formData['specialization'] === 'Architectural Design') ? 'selected' : ''; ?>>Architectural Design</option>
+										<option value="Urban Planning" <?php echo ($formData['specialization'] === 'Urban Planning') ? 'selected' : ''; ?>>Urban Planning</option>
+										<option value="Landscape Architecture" <?php echo ($formData['specialization'] === 'Landscape Architecture') ? 'selected' : ''; ?>>Landscape Architecture</option>
+										<option value="Building Technology" <?php echo ($formData['specialization'] === 'Building Technology') ? 'selected' : ''; ?>>Building Technology</option>
+										<option value="Environmental Architecture" <?php echo ($formData['specialization'] === 'Environmental Architecture') ? 'selected' : ''; ?>>Environmental Architecture</option>
+										<option value="Drafting & CAD" <?php echo ($formData['specialization'] === 'Drafting & CAD') ? 'selected' : ''; ?>>Drafting & CAD</option>
+									</optgroup>
+									<optgroup label="🔬 College of Science" data-department="College of Science">
+										<option value="Calculus" <?php echo ($formData['specialization'] === 'Calculus') ? 'selected' : ''; ?>>Calculus</option>
+										<option value="Algebra" <?php echo ($formData['specialization'] === 'Algebra') ? 'selected' : ''; ?>>Algebra</option>
+										<option value="Statistics" <?php echo ($formData['specialization'] === 'Statistics') ? 'selected' : ''; ?>>Statistics</option>
+										<option value="Probability" <?php echo ($formData['specialization'] === 'Probability') ? 'selected' : ''; ?>>Probability</option>
+										<option value="Differential Equations" <?php echo ($formData['specialization'] === 'Differential Equations') ? 'selected' : ''; ?>>Differential Equations</option>
+										<option value="General Biology" <?php echo ($formData['specialization'] === 'General Biology') ? 'selected' : ''; ?>>General Biology</option>
+										<option value="Microbiology" <?php echo ($formData['specialization'] === 'Microbiology') ? 'selected' : ''; ?>>Microbiology</option>
+										<option value="Genetics" <?php echo ($formData['specialization'] === 'Genetics') ? 'selected' : ''; ?>>Genetics</option>
+										<option value="Ecology" <?php echo ($formData['specialization'] === 'Ecology') ? 'selected' : ''; ?>>Ecology</option>
+										<option value="Anatomy & Physiology" <?php echo ($formData['specialization'] === 'Anatomy & Physiology') ? 'selected' : ''; ?>>Anatomy & Physiology</option>
+										<option value="General Chemistry" <?php echo ($formData['specialization'] === 'General Chemistry') ? 'selected' : ''; ?>>General Chemistry</option>
+										<option value="Organic Chemistry" <?php echo ($formData['specialization'] === 'Organic Chemistry') ? 'selected' : ''; ?>>Organic Chemistry</option>
+										<option value="Physical Chemistry" <?php echo ($formData['specialization'] === 'Physical Chemistry') ? 'selected' : ''; ?>>Physical Chemistry</option>
+										<option value="Biochemistry" <?php echo ($formData['specialization'] === 'Biochemistry') ? 'selected' : ''; ?>>Biochemistry</option>
+										<option value="Physics" <?php echo ($formData['specialization'] === 'Physics') ? 'selected' : ''; ?>>Physics</option>
+									</optgroup>
+									<optgroup label="🧑‍💼 College of Business Administration" data-department="College of Business Administration">
+										<option value="Accounting" <?php echo ($formData['specialization'] === 'Accounting') ? 'selected' : ''; ?>>Accounting</option>
+										<option value="Auditing" <?php echo ($formData['specialization'] === 'Auditing') ? 'selected' : ''; ?>>Auditing</option>
+										<option value="Taxation" <?php echo ($formData['specialization'] === 'Taxation') ? 'selected' : ''; ?>>Taxation</option>
+										<option value="Financial Management" <?php echo ($formData['specialization'] === 'Financial Management') ? 'selected' : ''; ?>>Financial Management</option>
+										<option value="Marketing" <?php echo ($formData['specialization'] === 'Marketing') ? 'selected' : ''; ?>>Marketing</option>
+										<option value="Entrepreneurship" <?php echo ($formData['specialization'] === 'Entrepreneurship') ? 'selected' : ''; ?>>Entrepreneurship</option>
+										<option value="Business Analytics" <?php echo ($formData['specialization'] === 'Business Analytics') ? 'selected' : ''; ?>>Business Analytics</option>
+										<option value="Economics" <?php echo ($formData['specialization'] === 'Economics') ? 'selected' : ''; ?>>Economics</option>
+										<option value="Operations Management" <?php echo ($formData['specialization'] === 'Operations Management') ? 'selected' : ''; ?>>Operations Management</option>
+										<option value="Tourism Management" <?php echo ($formData['specialization'] === 'Tourism Management') ? 'selected' : ''; ?>>Tourism Management</option>
+										<option value="Hospitality Management" <?php echo ($formData['specialization'] === 'Hospitality Management') ? 'selected' : ''; ?>>Hospitality Management</option>
+									</optgroup>
+									<optgroup label="🧑‍🏫 College of Education & Liberal Arts" data-department="College of Education and Liberal Arts">
+										<option value="English" <?php echo ($formData['specialization'] === 'English') ? 'selected' : ''; ?>>English</option>
+										<option value="Mathematics" <?php echo ($formData['specialization'] === 'Mathematics') ? 'selected' : ''; ?>>Mathematics</option>
+										<option value="Science" <?php echo ($formData['specialization'] === 'Science') ? 'selected' : ''; ?>>Science</option>
+										<option value="Social Studies" <?php echo ($formData['specialization'] === 'Social Studies') ? 'selected' : ''; ?>>Social Studies</option>
+										<option value="Early Childhood Education" <?php echo ($formData['specialization'] === 'Early Childhood Education') ? 'selected' : ''; ?>>Early Childhood Education</option>
+										<option value="Educational Technology" <?php echo ($formData['specialization'] === 'Educational Technology') ? 'selected' : ''; ?>>Educational Technology</option>
+										<option value="Clinical Psychology" <?php echo ($formData['specialization'] === 'Clinical Psychology') ? 'selected' : ''; ?>>Clinical Psychology</option>
+										<option value="Industrial Psychology" <?php echo ($formData['specialization'] === 'Industrial Psychology') ? 'selected' : ''; ?>>Industrial Psychology</option>
+										<option value="Developmental Psychology" <?php echo ($formData['specialization'] === 'Developmental Psychology') ? 'selected' : ''; ?>>Developmental Psychology</option>
+										<option value="Journalism" <?php echo ($formData['specialization'] === 'Journalism') ? 'selected' : ''; ?>>Journalism</option>
+										<option value="Broadcasting" <?php echo ($formData['specialization'] === 'Broadcasting') ? 'selected' : ''; ?>>Broadcasting</option>
+										<option value="Public Relations" <?php echo ($formData['specialization'] === 'Public Relations') ? 'selected' : ''; ?>>Public Relations</option>
+										<option value="Governance & Public Policy" <?php echo ($formData['specialization'] === 'Governance & Public Policy') ? 'selected' : ''; ?>>Governance & Public Policy</option>
+									</optgroup>
+									<optgroup label="🩺 College of Nursing" data-department="College of Nursing">
+										<option value="Medical-Surgical Nursing" <?php echo ($formData['specialization'] === 'Medical-Surgical Nursing') ? 'selected' : ''; ?>>Medical-Surgical Nursing</option>
+										<option value="Community Health Nursing" <?php echo ($formData['specialization'] === 'Community Health Nursing') ? 'selected' : ''; ?>>Community Health Nursing</option>
+										<option value="Psychiatric Nursing" <?php echo ($formData['specialization'] === 'Psychiatric Nursing') ? 'selected' : ''; ?>>Psychiatric Nursing</option>
+										<option value="Maternal & Child Nursing" <?php echo ($formData['specialization'] === 'Maternal & Child Nursing') ? 'selected' : ''; ?>>Maternal & Child Nursing</option>
+										<option value="Nursing Research" <?php echo ($formData['specialization'] === 'Nursing Research') ? 'selected' : ''; ?>>Nursing Research</option>
+									</optgroup>
+									<optgroup label="💊 College of Pharmacy" data-department="College of Pharmacy">
+										<option value="Pharmacology" <?php echo ($formData['specialization'] === 'Pharmacology') ? 'selected' : ''; ?>>Pharmacology</option>
+										<option value="Pharmaceutics" <?php echo ($formData['specialization'] === 'Pharmaceutics') ? 'selected' : ''; ?>>Pharmaceutics</option>
+										<option value="Clinical Pharmacy" <?php echo ($formData['specialization'] === 'Clinical Pharmacy') ? 'selected' : ''; ?>>Clinical Pharmacy</option>
+										<option value="Pharmaceutical Chemistry" <?php echo ($formData['specialization'] === 'Pharmaceutical Chemistry') ? 'selected' : ''; ?>>Pharmaceutical Chemistry</option>
+										<option value="Drug Development" <?php echo ($formData['specialization'] === 'Drug Development') ? 'selected' : ''; ?>>Drug Development</option>
+									</optgroup>
+									<optgroup label="⚖️ College of Law" data-department="College of Law">
+										<option value="Civil Law" <?php echo ($formData['specialization'] === 'Civil Law') ? 'selected' : ''; ?>>Civil Law</option>
+										<option value="Criminal Law" <?php echo ($formData['specialization'] === 'Criminal Law') ? 'selected' : ''; ?>>Criminal Law</option>
+										<option value="Constitutional Law" <?php echo ($formData['specialization'] === 'Constitutional Law') ? 'selected' : ''; ?>>Constitutional Law</option>
+										<option value="Corporate Law" <?php echo ($formData['specialization'] === 'Corporate Law') ? 'selected' : ''; ?>>Corporate Law</option>
+										<option value="Labor Law" <?php echo ($formData['specialization'] === 'Labor Law') ? 'selected' : ''; ?>>Labor Law</option>
+										<option value="Taxation Law" <?php echo ($formData['specialization'] === 'Taxation Law') ? 'selected' : ''; ?>>Taxation Law</option>
+									</optgroup>
+								</select>
 							</div>
 							<div class="mb-3">
 								<label class="form-label">Faculty number</label>
@@ -389,6 +516,49 @@ include __DIR__ . '/../includes/header.php';
 	const passwordEl = document.getElementById('password');
 	const togglePassword = document.getElementById('togglePassword');
 	const pwStrength = document.getElementById('pwStrength');
+	const contactEl = document.getElementById('contact_number');
+	const phoneValidation = document.getElementById('phoneValidation');
+	const phoneError = document.getElementById('phoneError');
+	const phoneHint = document.getElementById('phoneHint');
+
+	// Phone number formatting and validation
+	contactEl.addEventListener('input', function() {
+		// Allow only digits
+		let value = this.value.replace(/\D/g, '');
+		
+		// Limit to 10 digits
+		if (value.length > 10) {
+			value = value.substring(0, 10);
+		}
+		
+		this.value = value;
+		
+		// Update validation indicator
+		if (value.length === 0) {
+			phoneValidation.textContent = '⚪';
+			phoneValidation.style.color = '#999';
+			phoneError.style.display = 'none';
+			phoneHint.style.display = '';
+		} else if (value.length === 10) {
+			phoneValidation.textContent = '✓';
+			phoneValidation.style.color = '#28a745';
+			phoneError.style.display = 'none';
+			phoneHint.style.display = 'none';
+		} else {
+			phoneValidation.textContent = '✕';
+			phoneValidation.style.color = '#dc3545';
+			phoneError.style.display = 'block';
+			phoneHint.style.display = 'none';
+		}
+	});
+
+	// Validate phone on blur
+	contactEl.addEventListener('blur', function() {
+		const value = this.value.trim();
+		if (value !== '' && value.length !== 10) {
+			phoneError.style.display = 'block';
+		}
+	});
 
 	// Show/hide student/faculty fields
 	function update() {
@@ -461,11 +631,11 @@ include __DIR__ . '/../includes/header.php';
 			return false;
 		}
 
-		// Contact number must be numbers only
-		const contact = form.contact_number.value.trim();
-		if (contact !== "" && !/^[0-9]+$/.test(contact)) {
-			alert("Contact number must contain numbers only.");
-			form.contact_number.focus();
+		// Contact number must be exactly 10 digits or empty
+		const contact = contactEl.value.trim();
+		if (contact !== "" && contact.length !== 10) {
+			phoneError.style.display = 'block';
+			contactEl.focus();
 			e.preventDefault();
 			return false;
 		}

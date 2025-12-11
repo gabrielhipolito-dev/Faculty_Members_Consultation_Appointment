@@ -55,10 +55,26 @@ function getStudentUpcomingAppointments($studentId, $limit = 5) {
     global $conn;
     
     try {
+        // First, resolve user_id to student_id if needed
+        $actualStudentId = $studentId;
+        
+        // Check if $studentId is a user_id, if so convert to student_id
+        $checkStmt = $conn->prepare('SELECT student_id FROM Student WHERE user_id = ?');
+        $checkStmt->bind_param('i', $studentId);
+        $checkStmt->execute();
+        $checkResult = $checkStmt->get_result();
+        if ($checkResult && $checkResult->num_rows > 0) {
+            $row = $checkResult->fetch_assoc();
+            $actualStudentId = $row['student_id'];
+        }
+        $checkStmt->close();
+        
         $stmt = $conn->prepare('
             SELECT 
                 a.appointment_id,
                 a.appointment_date,
+                a.topic,
+                a.purpose,
                 a.status,
                 av.start_time,
                 av.end_time,
@@ -76,7 +92,7 @@ function getStudentUpcomingAppointments($studentId, $limit = 5) {
             LIMIT ?
         ');
         
-        $stmt->bind_param('ii', $studentId, $limit);
+        $stmt->bind_param('ii', $actualStudentId, $limit);
         $stmt->execute();
         $result = $stmt->get_result();
         $appointments = [];
