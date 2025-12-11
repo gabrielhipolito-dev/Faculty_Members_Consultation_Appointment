@@ -3,30 +3,69 @@
 require_once __DIR__ . '/../actions/load_user.php';
 require_once __DIR__ . '/../config/db.php';
 
-// Check if logged in and is faculty
+// Check if logged in
 if (!isset($_SESSION['user_id'])) {
     header("Location: login.php?error=Please login first");
     exit;
 }
 
-// Verify faculty role - $user already loaded by load_user.php
-if ($user['role'] !== 'Faculty') {
-    header("Location: index.php?error=Only faculty can manage schedules");
+// Verify role - $user already loaded by load_user.php
+if ($user['role'] !== 'Faculty' && $user['role'] !== 'Admin') {
+    header("Location: index.php?error=Only faculty and admins can manage schedules");
     exit;
 }
 
-// Get faculty_id
-$stmt = $conn->prepare("SELECT faculty_id FROM Faculty WHERE user_id = ?");
-$stmt->bind_param('i', $_SESSION['user_id']);
-$stmt->execute();
-$facultyRes = $stmt->get_result();
-if (!$facultyRes || $facultyRes->num_rows === 0) {
-    header("Location: dashboard_faculty.php?error=Faculty profile not found");
-    exit;
+// Determine faculty_id to manage
+$faculty_id = null;
+$isAdmin = $user['role'] === 'Admin';
+
+if ($isAdmin) {
+    // Admin can select any faculty or view from URL parameter
+    $selected_faculty_id = $_GET['faculty_id'] ?? null;
+    
+    if ($selected_faculty_id) {
+        // Verify the faculty exists
+        $stmt = $conn->prepare("SELECT faculty_id FROM Faculty WHERE faculty_id = ?");
+        $stmt->bind_param('i', $selected_faculty_id);
+        $stmt->execute();
+        $facultyRes = $stmt->get_result();
+        if ($facultyRes && $facultyRes->num_rows > 0) {
+            $faculty_id = $selected_faculty_id;
+        }
+        $stmt->close();
+    }
+} else {
+    // Faculty member - get their own faculty_id
+    $stmt = $conn->prepare("SELECT faculty_id FROM Faculty WHERE user_id = ?");
+    $stmt->bind_param('i', $_SESSION['user_id']);
+    $stmt->execute();
+    $facultyRes = $stmt->get_result();
+    if (!$facultyRes || $facultyRes->num_rows === 0) {
+        header("Location: dashboard_faculty.php?error=Faculty profile not found");
+        exit;
+    }
+    $faculty = $facultyRes->fetch_assoc();
+    $faculty_id = $faculty['faculty_id'];
+    $stmt->close();
 }
-$faculty = $facultyRes->fetch_assoc();
-$faculty_id = $faculty['faculty_id'];
-$stmt->close();
+
+// Get all faculty for admin dropdown
+$allFacultyList = [];
+if ($isAdmin) {
+    $stmt = $conn->prepare("
+        SELECT f.faculty_id, u.name, u.user_id
+        FROM Faculty f
+        INNER JOIN Users u ON f.user_id = u.user_id
+        WHERE u.status = 'Active'
+        ORDER BY u.name ASC
+    ");
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $allFacultyList[] = $row;
+    }
+    $stmt->close();
+}
 
 // Get current availability
 $availStmt = $conn->prepare("
@@ -56,15 +95,45 @@ include __DIR__ . '/../includes/partials/dashboard_sidebar.php';
         <!-- Header -->
         <div class="row mb-4">
             <div class="col-12">
-                <a href="dashboard_faculty.php" class="btn btn-light mb-3" style="border-radius: 8px;">
+                <a href="<?php echo $isAdmin ? 'dashboard_admin.php' : 'dashboard_faculty.php'; ?>" class="btn btn-light mb-3" style="border-radius: 8px;">
                     ← Back to Dashboard
                 </a>
                 <div class="text-white">
                     <h2 class="fw-bold mb-2">🕒 Manage Consultation Schedule</h2>
-                    <p class="mb-0 opacity-75">Set your available days and times for student consultations</p>
+                    <p class="mb-0 opacity-75"><?php echo $isAdmin ? 'Set faculty availability for student consultations' : 'Set your available days and times for student consultations'; ?></p>
                 </div>
             </div>
         </div>
+
+        <!-- Faculty Selector for Admin -->
+        <?php if ($isAdmin && !empty($allFacultyList)): ?>
+            <div class="row mb-4">
+                <div class="col-lg-6">
+                    <div class="card border-0 shadow-sm" style="border-radius: 12px;">
+                        <div class="card-body p-3">
+                            <label class="fw-bold mb-2">Select Faculty Member</label>
+                            <div class="d-flex gap-2">
+                                <select class="form-select" id="facultySelector" onchange="selectFaculty(this.value)" style="border-radius: 8px;">
+                                    <option value="">Choose a faculty member...</option>
+                                    <?php foreach ($allFacultyList as $fac): ?>
+                                        <option value="<?php echo $fac['faculty_id']; ?>" <?php echo $faculty_id == $fac['faculty_id'] ? 'selected' : ''; ?>>
+                                            <?php echo htmlspecialchars($fac['name']); ?>
+                                        </option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        <?php endif; ?>
+
+        <?php if ($isAdmin && !$faculty_id): ?>
+            <div class="alert alert-info alert-dismissible fade show" role="alert" style="border-radius: 10px;">
+                <strong>Please select a faculty member</strong> from the dropdown above to manage their schedule.
+                <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+            </div>
+        <?php endif; ?>
 
         <?php if (isset($_GET['success'])): ?>
             <div class="alert alert-success alert-dismissible fade show" role="alert" style="border-radius: 10px;">
@@ -79,6 +148,8 @@ include __DIR__ . '/../includes/partials/dashboard_sidebar.php';
                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
             </div>
         <?php endif; ?>
+
+        <?php if ($faculty_id): ?>
 
         <div class="row">
             <!-- Current Schedule -->
@@ -224,8 +295,54 @@ include __DIR__ . '/../includes/partials/dashboard_sidebar.php';
                 </div>
             </div>
         </div>
+        <?php endif; ?>
     </div>
 </div>
+
+<script>
+    function selectFaculty(facultyId) {
+        if (facultyId) {
+            window.location.href = '?faculty_id=' + facultyId;
+        }
+    }
+
+    function setTime(start, end) {
+        document.getElementById('start_time').value = start;
+        document.getElementById('end_time').value = end;
+    }
+
+    function deleteSchedule(availabilityId) {
+        if (confirm('Are you sure you want to delete this time slot?')) {
+            fetch('../actions/delete_schedule.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'availability_id=' + availabilityId
+            })
+            .then(response => response.text())
+            .then(data => {
+                location.reload();
+            });
+        }
+    }
+
+    function deleteAllSchedules() {
+        if (confirm('Are you sure you want to delete ALL time slots? This action cannot be undone.')) {
+            fetch('../actions/delete_all_schedule.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: 'faculty_id=<?php echo $faculty_id; ?>'
+            })
+            .then(response => response.text())
+            .then(data => {
+                location.reload();
+            });
+        }
+    }
+</script>
 
 <style>
     .form-control:focus, .form-select:focus {

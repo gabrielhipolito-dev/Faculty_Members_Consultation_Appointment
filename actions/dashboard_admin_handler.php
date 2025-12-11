@@ -77,4 +77,57 @@ function getAdminTodayAppointments($conn, $limit = 10) {
     $stmt->close();
     return $data;
 }
-?>
+
+function getAdminAllStudents($conn) {
+    $data = [];
+    $stmt = $conn->prepare("
+        SELECT 
+            u.user_id,
+            u.name,
+            u.email,
+            u.contact_number,
+            u.profile_picture,
+            st.course,
+            st.year_level,
+            st.student_number,
+            u.status
+        FROM Users u
+        INNER JOIN Student st ON u.user_id = st.user_id
+        WHERE u.role = 'Student'
+        ORDER BY u.name ASC
+    ");
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $data[] = $row;
+    }
+    $stmt->close();
+    return $data;
+}
+
+function getAdminAllFaculty($conn) {
+    $data = [];
+    $stmt = $conn->prepare("
+        SELECT 
+            u.user_id,
+            u.name,
+            u.email,
+            u.contact_number,
+            u.profile_picture,
+            f.department,
+            f.specialization,
+            f.faculty_number,
+            u.status
+        FROM Users u
+        INNER JOIN Faculty f ON u.user_id = f.user_id
+        WHERE u.role = 'Faculty'
+        ORDER BY u.name ASC
+    ");
+    $stmt->execute();
+    $res = $stmt->get_result();
+    while ($row = $res->fetch_assoc()) {
+        $data[] = $row;
+    }
+    $stmt->close();
+    return $data;
+}

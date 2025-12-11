@@ -11,6 +11,8 @@ $stats = getAdminStats($conn);
 $pendingAppointments = getAdminPendingAppointments($conn, 10);
 $upcomingAppointments = getAdminUpcomingAppointments($conn, 8);
 $todayAppointments = getAdminTodayAppointments($conn, 6);
+$allStudents = getAdminAllStudents($conn);
+$allFaculty = getAdminAllFaculty($conn);
 ?>
 
 <?php include __DIR__ . '/../includes/header.php'; ?>
@@ -82,6 +84,37 @@ $todayAppointments = getAdminTodayAppointments($conn, 6);
                         <small class="text-muted">Total</small>
                     </div>
                 </div>
+            </div>
+        </div>
+
+        <!-- Quick Actions -->
+        <div class="row g-3 mb-4">
+            <div class="col-md-4">
+                <a href="manage_schedule.php" class="card border-0 shadow-sm text-decoration-none h-100" style="border-radius: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; transition: all 0.3s ease;">
+                    <div class="card-body text-center py-4">
+                        <div style="font-size: 36px; margin-bottom: 10px;">📅</div>
+                        <h5 class="fw-bold mb-1">Manage Schedules</h5>
+                        <small class="opacity-75">Create/Edit faculty schedules</small>
+                    </div>
+                </a>
+            </div>
+            <div class="col-md-4">
+                <button type="button" class="card border-0 shadow-sm text-decoration-none h-100" style="border-radius: 12px; background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white; transition: all 0.3s ease; border: none; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#viewStudentsModal">
+                    <div class="card-body text-center py-4">
+                        <div style="font-size: 36px; margin-bottom: 10px;">👥</div>
+                        <h5 class="fw-bold mb-1">View All Students</h5>
+                        <small class="opacity-75">See all registered students</small>
+                    </div>
+                </button>
+            </div>
+            <div class="col-md-4">
+                <button type="button" class="card border-0 shadow-sm text-decoration-none h-100" style="border-radius: 12px; background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white; transition: all 0.3s ease; border: none; cursor: pointer;" data-bs-toggle="modal" data-bs-target="#viewFacultyModal">
+                    <div class="card-body text-center py-4">
+                        <div style="font-size: 36px; margin-bottom: 10px;">🎓</div>
+                        <h5 class="fw-bold mb-1">View All Faculty</h5>
+                        <small class="opacity-75">See all registered faculty</small>
+                    </div>
+                </button>
             </div>
         </div>
 
@@ -188,6 +221,89 @@ $todayAppointments = getAdminTodayAppointments($conn, 6);
     .card { transition: all 0.2s ease; }
     .card:hover { transform: translateY(-2px); }
 </style>
+
+<!-- Modal: View All Students -->
+<div class="modal fade" id="viewStudentsModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0">
+            <div class="modal-header border-bottom" style="background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); color: white;">
+                <h5 class="modal-title fw-bold">All Students (<?php echo count($allStudents); ?>)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <?php if (empty($allStudents)): ?>
+                    <p class="text-muted text-center py-4 mb-0">No students found</p>
+                <?php else: ?>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($allStudents as $student): ?>
+                            <div class="list-group-item px-4 py-3 border-bottom">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <img src="<?php echo htmlspecialchars(adminResolveProfileImage($student['profile_picture'])); ?>" alt="Student" width="45" height="45" style="object-fit: cover; border-radius: 50%; background:#f0f0f0;">
+                                    </div>
+                                    <div class="col">
+                                        <div class="fw-bold"><?php echo htmlspecialchars($student['name']); ?></div>
+                                        <div class="text-muted small">
+                                            <?php echo htmlspecialchars($student['student_number']); ?> • <?php echo htmlspecialchars($student['course']); ?> - Year <?php echo htmlspecialchars($student['year_level']); ?>
+                                        </div>
+                                        <div class="text-muted small"><?php echo htmlspecialchars($student['email']); ?></div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <span class="badge" style="background-color: <?php echo $student['status'] === 'Active' ? '#28a745' : '#dc3545'; ?>; color: white;">
+                                            <?php echo htmlspecialchars($student['status']); ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Modal: View All Faculty -->
+<div class="modal fade" id="viewFacultyModal" tabindex="-1">
+    <div class="modal-dialog modal-lg modal-dialog-scrollable">
+        <div class="modal-content border-0">
+            <div class="modal-header border-bottom" style="background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); color: white;">
+                <h5 class="modal-title fw-bold">All Faculty (<?php echo count($allFaculty); ?>)</h5>
+                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body p-0">
+                <?php if (empty($allFaculty)): ?>
+                    <p class="text-muted text-center py-4 mb-0">No faculty found</p>
+                <?php else: ?>
+                    <div class="list-group list-group-flush">
+                        <?php foreach ($allFaculty as $faculty): ?>
+                            <div class="list-group-item px-4 py-3 border-bottom">
+                                <div class="row align-items-center">
+                                    <div class="col-auto">
+                                        <img src="<?php echo htmlspecialchars(adminResolveProfileImage($faculty['profile_picture'])); ?>" alt="Faculty" width="45" height="45" style="object-fit: cover; border-radius: 50%; background:#f0f0f0;">
+                                    </div>
+                                    <div class="col">
+                                        <div class="fw-bold"><?php echo htmlspecialchars($faculty['name']); ?></div>
+                                        <div class="text-muted small">
+                                            <?php echo htmlspecialchars($faculty['faculty_number']); ?> • <?php echo htmlspecialchars($faculty['department']); ?>
+                                        </div>
+                                        <div class="text-muted small"><?php echo htmlspecialchars($faculty['specialization']); ?></div>
+                                        <div class="text-muted small"><?php echo htmlspecialchars($faculty['email']); ?></div>
+                                    </div>
+                                    <div class="col-auto">
+                                        <span class="badge" style="background-color: <?php echo $faculty['status'] === 'Active' ? '#28a745' : '#dc3545'; ?>; color: white;">
+                                            <?php echo htmlspecialchars($faculty['status']); ?>
+                                        </span>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endforeach; ?>
+                    </div>
+                <?php endif; ?>
+            </div>
+        </div>
+    </div>
+</div>
 
 <?php include __DIR__ . '/../includes/footer.php'; ?>
 <?php include __DIR__ . '/../includes/profile_modal.php'; ?>
