@@ -180,12 +180,7 @@ include __DIR__ . '/../includes/header.php';
 
 						<div class="mb-3">
 							<label class="form-label">Address</label>
-							<textarea name="address" id="address" class="form-control" maxlength="300" rows="3" placeholder="e.g., Street Number/Name, Barangay, City, Province, Postal Code"><?php echo htmlspecialchars($formData['address']); ?></textarea>
-							<div class="d-flex justify-content-between align-items-center mt-2">
-								<small class="form-text text-muted">Philippine address format recommended</small>
-								<small class="form-text"><span id="charCount">0</span>/300</small>
-							</div>
-							<div class="form-text text-danger" id="addressError" style="display:none">Address must be 20-300 characters and include street, barangay, city, and province.</div>
+							<textarea name="address" class="form-control"><?php echo htmlspecialchars($formData['address']); ?></textarea>
 						</div>
 
 						<div class="mb-3">
@@ -525,91 +520,6 @@ include __DIR__ . '/../includes/header.php';
 	const phoneValidation = document.getElementById('phoneValidation');
 	const phoneError = document.getElementById('phoneError');
 	const phoneHint = document.getElementById('phoneHint');
-	const addressEl = document.getElementById('address');
-	const charCount = document.getElementById('charCount');
-	const addressError = document.getElementById('addressError');
-
-	// List of valid Philippine cities/municipalities and provinces
-	const philippineCities = [
-		'imus', 'dasmariñas', 'bacoor', 'kawit', 'rosario', 'magallanes', 'maragondon',
-		'tagaytay', 'silang', 'indang', 'general trivia', 'general mariano alvarez',
-		'cavite city', 'manila', 'quezon city', 'cebu', 'davao', 'manila', 'caloocan',
-		'las piñas', 'makati', 'mandaluyong', 'marikina', 'pasay', 'pasig', 'pateros',
-		'san juan', 'taguig', 'paranaque', 'muntinlupa', 'iloilo', 'bacolod', 'cebuh'
-	];
-
-	const philippineProvinces = [
-		'cavite', 'laguna', 'batangas', 'quezon', 'rizal', 'bulacan', 'nueva ecija',
-		'pampanga', 'tarlac', 'zambales', 'pangasinan', 'ilocos norte', 'ilocos sur',
-		'la union', 'benguet', 'ifugao', 'apayao', 'kalinga', 'mountain province',
-		'cagayan', 'isabela', 'nueva vizcaya', 'quirino', 'aurora', 'sorsogon',
-		'albay', 'camarines norte', 'camarines sur', 'misamis oriental', 'misamis occidental',
-		'negros occidental', 'negros oriental', 'iloilo', 'capiz', 'aklan', 'antique',
-		'masbate', 'siquijor', 'bohol', 'cebu', 'dinagat islands', 'surigao del norte',
-		'surigao del sur', 'agusan del norte', 'agusan del sur', 'davao oriental',
-		'davao occidental', 'davao del norte', 'davao del sur', 'south cotabato',
-		'cotabato', 'sarangani', 'sultan kudarat', 'maguindanao', 'lanao del norte',
-		'lanao del sur', 'basilan', 'sulu', 'tawi-tawi', 'palawan', 'romblon',
-		'mindoro occidental', 'mindoro oriental', 'batanes', 'catanduanes'
-	];
-
-	// Address validation function
-	function validateAddress(address) {
-		const trimmed = address.trim().toLowerCase();
-		
-		// Check minimum length
-		if (trimmed.length < 20) {
-			return false;
-		}
-
-		// Check if address contains comma-separated components (street, barangay, city, province)
-		const parts = trimmed.split(',').map(p => p.trim());
-		if (parts.length < 3) {
-			return false;
-		}
-
-		// Check if at least one part contains a Philippine city or province name
-		const hasPhilippineLocation = parts.some(part => {
-			return philippineCities.some(city => part.includes(city)) ||
-				   philippineProvinces.some(province => part.includes(province)) ||
-				   part.includes('philippines') || part.includes('ph');
-		});
-
-		return hasPhilippineLocation;
-	}
-
-	// Address character counter and validation
-	addressEl.addEventListener('input', function() {
-		const length = this.value.length;
-		charCount.textContent = length;
-		
-		// Update character count color
-		if (length > 0 && length < 20) {
-			charCount.parentElement.style.color = '#dc3545';
-		} else if (length >= 20 && length <= 300) {
-			const isValid = validateAddress(this.value);
-			charCount.parentElement.style.color = isValid ? '#28a745' : '#ffc107';
-		} else {
-			charCount.parentElement.style.color = '#999';
-		}
-	});
-
-	// Address validation on blur
-	addressEl.addEventListener('blur', function() {
-		const value = this.value.trim();
-		if (value !== '' && value.length >= 20) {
-			if (!validateAddress(value)) {
-				addressError.style.display = 'block';
-			} else {
-				addressError.style.display = 'none';
-			}
-		}
-	});
-
-	// Initialize character count on page load
-	if (addressEl.value.length > 0) {
-		charCount.textContent = addressEl.value.length;
-	}
 
 	// Phone number formatting and validation
 	contactEl.addEventListener('input', function() {
