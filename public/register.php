@@ -1,5 +1,91 @@
 <?php
-// Simple registration page. Submits to ../actions/register_action.php
+if (session_status() === PHP_SESSION_NONE) session_start();
+require_once __DIR__ . '/../config/db.php';
+
+$currentUser = null;
+$isAdmin = false;
+
+if (isset($_SESSION['user_id'])) {
+	$stmt = $conn->prepare("SELECT user_id, name, role FROM Users WHERE user_id = ? LIMIT 1");
+	$stmt->bind_param('i', $_SESSION['user_id']);
+	if ($stmt->execute()) {
+		$currentUser = $stmt->get_result()->fetch_assoc();
+		$isAdmin = $currentUser && $currentUser['role'] === 'Admin';
+	}
+	$stmt->close();
+}
+
+$editUserId = isset($_GET['edit_user_id']) ? (int) $_GET['edit_user_id'] : null;
+
+$formData = [
+	'user_id' => null,
+	'name' => '',
+	'username' => '',
+	'email' => '',
+	'password' => '',
+	'role' => 'Student',
+	'birthdate' => '',
+	'gender' => '',
+	'contact_number' => '',
+	'address' => '',
+	'course' => '',
+	'year_level' => '1',
+	'student_number' => '',
+	'department' => '',
+	'specialization' => '',
+	'faculty_number' => '',
+	'profile_picture' => '',
+];
+
+if ($isAdmin && $editUserId) {
+	$stmt = $conn->prepare(
+		"SELECT u.*, s.course, s.year_level, s.student_number, f.department, f.specialization, f.faculty_number
+		 FROM Users u
+		 LEFT JOIN Student s ON s.user_id = u.user_id
+		 LEFT JOIN Faculty f ON f.user_id = u.user_id
+		 WHERE u.user_id = ? LIMIT 1"
+	);
+	$stmt->bind_param('i', $editUserId);
+	if ($stmt->execute()) {
+		$res = $stmt->get_result();
+		if ($res && $res->num_rows === 1) {
+			$row = $res->fetch_assoc();
+			$formData = array_merge($formData, [
+				'user_id' => $row['user_id'],
+				'name' => $row['name'] ?? '',
+				'username' => $row['username'] ?? '',
+				'email' => $row['email'] ?? '',
+				'role' => $row['role'] ?? 'Student',
+				'birthdate' => $row['birthdate'] ?? '',
+				'gender' => $row['gender'] ?? '',
+				'contact_number' => $row['contact_number'] ?? '',
+				'address' => $row['address'] ?? '',
+				'course' => $row['course'] ?? '',
+				'year_level' => $row['year_level'] ?? '1',
+				'student_number' => $row['student_number'] ?? '',
+				'department' => $row['department'] ?? '',
+				'specialization' => $row['specialization'] ?? '',
+				'faculty_number' => $row['faculty_number'] ?? '',
+				'profile_picture' => $row['profile_picture'] ?? '',
+			]);
+		}
+	}
+	$stmt->close();
+}
+
+$mode = ($isAdmin && $formData['user_id']) ? 'update' : 'create';
+
+$userList = [];
+if ($isAdmin) {
+	$res = $conn->query("SELECT user_id, name, email, role, status FROM Users ORDER BY user_id DESC");
+	if ($res) {
+		while ($row = $res->fetch_assoc()) {
+			$userList[] = $row;
+		}
+	}
+}
+
+// Simple registration / account management page. Submits to ../actions/register_action.php
 include __DIR__ . '/../includes/header.php';
 ?>
 
@@ -8,7 +94,19 @@ include __DIR__ . '/../includes/header.php';
 		<div class="col-md-8">
 			<div class="card">
 				<div class="card-body">
-					<h3 class="card-title">Create Account</h3>
+					<div class="d-flex justify-content-between align-items-center">
+						<h3 class="card-title mb-0" id="manage"><?php echo ($mode === 'update') ? 'Update Account' : 'Create Account'; ?></h3>
+						<?php if ($isAdmin): ?>
+							<a class="btn btn-outline-secondary btn-sm" href="dashboard_admin.php">Back to Admin Dashboard</a>
+						<?php endif; ?>
+					</div>
+
+					<?php if ($mode === 'update'): ?>
+						<div class="alert alert-info d-flex justify-content-between align-items-center">
+							<div class="me-2">Editing account #<?php echo htmlspecialchars($formData['user_id']); ?>. Leave the password blank to keep the current one.</div>
+							<a class="btn btn-sm btn-outline-secondary" href="register.php">Cancel edit</a>
+						</div>
+					<?php endif; ?>
 					
 					<?php if (isset($_GET['error'])): ?>
 						<div class="alert alert-danger"><?php echo htmlspecialchars($_GET['error']); ?></div>
@@ -19,63 +117,72 @@ include __DIR__ . '/../includes/header.php';
 					<?php endif; ?>
 
 					<form action="../actions/register_action.php" method="post" id="registerForm" enctype="multipart/form-data">
+
+						<input type="hidden" name="action" id="formAction" value="<?php echo htmlspecialchars($mode); ?>">
+						<?php if ($mode === 'update'): ?>
+							<input type="hidden" name="user_id" value="<?php echo htmlspecialchars($formData['user_id']); ?>">
+							<input type="hidden" name="current_profile_picture" value="<?php echo htmlspecialchars($formData['profile_picture']); ?>">
+						<?php endif; ?>
 						
 						<div class="mb-3">
 							<label class="form-label">Full name</label>
-							<input type="text" name="name" class="form-control" required>
+							<input type="text" name="name" class="form-control" value="<?php echo htmlspecialchars($formData['name']); ?>" required>
 						</div>
 
 						<div class="mb-3">
 							<label class="form-label">Username</label>
-							<input type="text" name="username" class="form-control" required>
+							<input type="text" name="username" class="form-control" value="<?php echo htmlspecialchars($formData['username']); ?>" required>
 						</div>
 
 						<div class="mb-3">
 							<label class="form-label">Email</label>
-							<input type="email" name="email" id="email" class="form-control" required>
+							<input type="email" name="email" id="email" class="form-control" value="<?php echo htmlspecialchars($formData['email']); ?>" required>
 							<div class="form-text text-danger" id="emailError" style="display:none">Email must be a @gmail.com address.</div>
 						</div>
 
 						<div class="mb-3">
 							<label class="form-label">Password</label>
 							<div class="input-group">
-								<input type="password" name="password" id="password" class="form-control" required>
+								<input type="password" name="password" id="password" class="form-control" <?php echo ($mode === 'create') ? 'required' : ''; ?>>
 								<button type="button" class="btn btn-outline-secondary" id="togglePassword">Show</button>
 							</div>
+							<?php if ($mode === 'update'): ?>
+								<div class="form-text">Leave blank to keep the existing password.</div>
+							<?php endif; ?>
 							<div id="pwStrength" class="form-text mt-1"></div>
 						</div>
 
 						<div class="mb-3">
 							<label class="form-label">Contact number</label>
-							<input type="text" name="contact_number" class="form-control">
+							<input type="text" name="contact_number" class="form-control" value="<?php echo htmlspecialchars($formData['contact_number']); ?>">
 						</div>
 
 						<div class="mb-3">
 							<label class="form-label">Birthday</label>
-							<input type="date" name="birthdate" class="form-control">
+							<input type="date" name="birthdate" class="form-control" value="<?php echo htmlspecialchars($formData['birthdate']); ?>">
 						</div>
 
 						<div class="mb-3">
 							<label class="form-label">Gender</label>
-							<select name="gender" class="form-select">
-								<option value="">-- Select gender (optional) --</option>
-								<option value="Male">Male</option>
-								<option value="Female">Female</option>
-								<option value="Other">Other</option>
+							<select name="gender" class="form-select" required>
+								<option value="">-- Select gender --</option>
+								<option value="Male" <?php echo ($formData['gender'] === 'Male') ? 'selected' : ''; ?>>Male</option>
+								<option value="Female" <?php echo ($formData['gender'] === 'Female') ? 'selected' : ''; ?>>Female</option>
+								<option value="Other" <?php echo ($formData['gender'] === 'Other') ? 'selected' : ''; ?>>Other</option>
 							</select>
 						</div>
 
 						<div class="mb-3">
 							<label class="form-label">Address</label>
-							<textarea name="address" class="form-control"></textarea>
+							<textarea name="address" class="form-control"><?php echo htmlspecialchars($formData['address']); ?></textarea>
 						</div>
 
 						<div class="mb-3">
 							<label class="form-label">Role</label>
 							<div>
-								<label class="me-3"><input type="radio" name="role" value="Student" checked> Student</label>
-								<label class="me-3"><input type="radio" name="role" value="Faculty"> Faculty</label>
-								<label><input type="radio" name="role" value="Admin"> Admin</label>
+								<label class="me-3"><input type="radio" name="role" value="Student" <?php echo ($formData['role'] === 'Student') ? 'checked' : ''; ?>> Student</label>
+								<label class="me-3"><input type="radio" name="role" value="Faculty" <?php echo ($formData['role'] === 'Faculty') ? 'checked' : ''; ?>> Faculty</label>
+								<label><input type="radio" name="role" value="Admin" <?php echo ($formData['role'] === 'Admin') ? 'checked' : ''; ?>> Admin</label>
 							</div>
 						</div>
 
@@ -83,21 +190,73 @@ include __DIR__ . '/../includes/header.php';
 						<div id="studentFields">
 							<div class="mb-3">
 								<label class="form-label">Course</label>
-								<input type="text" name="course" class="form-control">
+								<select name="course" class="form-select">
+									<option value="">-- Select a course --</option>
+									<optgroup label="College of Computing and Information Technology (CCIT)">
+										<option value="BS Computer Science" <?php echo ($formData['course'] === 'BS Computer Science') ? 'selected' : ''; ?>>BS Computer Science</option>
+										<option value="BS Information Technology" <?php echo ($formData['course'] === 'BS Information Technology') ? 'selected' : ''; ?>>BS Information Technology</option>
+										<option value="BS Information Systems" <?php echo ($formData['course'] === 'BS Information Systems') ? 'selected' : ''; ?>>BS Information Systems</option>
+										<option value="Dual-degree: BS Computer Science + BS Information Engineering" <?php echo ($formData['course'] === 'Dual-degree: BS Computer Science + BS Information Engineering') ? 'selected' : ''; ?>>Dual-degree: BS Computer Science + BS Information Engineering</option>
+									</optgroup>
+									<optgroup label="College of Engineering">
+										<option value="BS Chemical Engineering" <?php echo ($formData['course'] === 'BS Chemical Engineering') ? 'selected' : ''; ?>>BS Chemical Engineering</option>
+										<option value="BS Chemical Process Technology" <?php echo ($formData['course'] === 'BS Chemical Process Technology') ? 'selected' : ''; ?>>BS Chemical Process Technology</option>
+										<option value="BS Civil Engineering" <?php echo ($formData['course'] === 'BS Civil Engineering') ? 'selected' : ''; ?>>BS Civil Engineering</option>
+										<option value="BS Computer Engineering" <?php echo ($formData['course'] === 'BS Computer Engineering') ? 'selected' : ''; ?>>BS Computer Engineering</option>
+										<option value="BS Electrical Engineering" <?php echo ($formData['course'] === 'BS Electrical Engineering') ? 'selected' : ''; ?>>BS Electrical Engineering</option>
+										<option value="BS Electronics/Electronics & Communications Engineering" <?php echo ($formData['course'] === 'BS Electronics/Electronics & Communications Engineering') ? 'selected' : ''; ?>>BS Electronics/Electronics & Communications Engineering</option>
+										<option value="BS Geology" <?php echo ($formData['course'] === 'BS Geology') ? 'selected' : ''; ?>>BS Geology</option>
+										<option value="BS Industrial Engineering" <?php echo ($formData['course'] === 'BS Industrial Engineering') ? 'selected' : ''; ?>>BS Industrial Engineering</option>
+										<option value="BS Mechanical Engineering" <?php echo ($formData['course'] === 'BS Mechanical Engineering') ? 'selected' : ''; ?>>BS Mechanical Engineering (including Mechatronics major/track)</option>
+										<option value="BS Mining Engineering" <?php echo ($formData['course'] === 'BS Mining Engineering') ? 'selected' : ''; ?>>BS Mining Engineering</option>
+										<option value="BS Petroleum Engineering" <?php echo ($formData['course'] === 'BS Petroleum Engineering') ? 'selected' : ''; ?>>BS Petroleum Engineering</option>
+									</optgroup>
+									<optgroup label="College of Science">
+										<option value="BS Biology" <?php echo ($formData['course'] === 'BS Biology') ? 'selected' : ''; ?>>BS Biology</option>
+										<option value="BS Chemistry" <?php echo ($formData['course'] === 'BS Chemistry') ? 'selected' : ''; ?>>BS Chemistry</option>
+										<option value="BS Psychology" <?php echo ($formData['course'] === 'BS Psychology') ? 'selected' : ''; ?>>BS Psychology</option>
+									</optgroup>
+									<optgroup label="College of Business Administration">
+										<option value="BS Accountancy" <?php echo ($formData['course'] === 'BS Accountancy') ? 'selected' : ''; ?>>BS Accountancy</option>
+										<option value="BS Business Administration - Financial Management" <?php echo ($formData['course'] === 'BS Business Administration - Financial Management') ? 'selected' : ''; ?>>BS Business Administration - Financial Management</option>
+										<option value="BS Business Administration - Marketing Management" <?php echo ($formData['course'] === 'BS Business Administration - Marketing Management') ? 'selected' : ''; ?>>BS Business Administration - Marketing Management</option>
+										<option value="BS Business Administration - Operations Management" <?php echo ($formData['course'] === 'BS Business Administration - Operations Management') ? 'selected' : ''; ?>>BS Business Administration - Operations Management</option>
+										<option value="BS Customs Administration" <?php echo ($formData['course'] === 'BS Customs Administration') ? 'selected' : ''; ?>>BS Customs Administration</option>
+										<option value="BS Hospitality Management" <?php echo ($formData['course'] === 'BS Hospitality Management') ? 'selected' : ''; ?>>BS Hospitality Management</option>
+									</optgroup>
+									<optgroup label="College of Education and Liberal Arts">
+										<option value="Bachelor of Elementary Education" <?php echo ($formData['course'] === 'Bachelor of Elementary Education') ? 'selected' : ''; ?>>Bachelor of Elementary Education</option>
+										<option value="Bachelor of Secondary Education" <?php echo ($formData['course'] === 'Bachelor of Secondary Education') ? 'selected' : ''; ?>>Bachelor of Secondary Education</option>
+										<option value="Bachelor of Physical Education / Exercise & Sports" <?php echo ($formData['course'] === 'Bachelor of Physical Education / Exercise & Sports') ? 'selected' : ''; ?>>Bachelor of Physical Education / Exercise & Sports</option>
+										<option value="BA in Communication" <?php echo ($formData['course'] === 'BA in Communication') ? 'selected' : ''; ?>>BA in Communication</option>
+										<option value="BA in Political Science" <?php echo ($formData['course'] === 'BA in Political Science') ? 'selected' : ''; ?>>BA in Political Science</option>
+										<option value="BA in Philosophy" <?php echo ($formData['course'] === 'BA in Philosophy') ? 'selected' : ''; ?>>BA in Philosophy</option>
+									</optgroup>
+									<optgroup label="College of Architecture">
+										<option value="BS Architecture" <?php echo ($formData['course'] === 'BS Architecture') ? 'selected' : ''; ?>>BS Architecture</option>
+									</optgroup>
+									<optgroup label="College of Nursing">
+										<option value="BS Nursing" <?php echo ($formData['course'] === 'BS Nursing') ? 'selected' : ''; ?>>BS Nursing</option>
+									</optgroup>
+									<optgroup label="College of Pharmacy">
+										<option value="BS Pharmacy" <?php echo ($formData['course'] === 'BS Pharmacy') ? 'selected' : ''; ?>>BS Pharmacy</option>
+									</optgroup>
+									<optgroup label="College of Law">
+										<option value="Bachelor of Laws (LLB)" <?php echo ($formData['course'] === 'Bachelor of Laws (LLB)') ? 'selected' : ''; ?>>Bachelor of Laws (LLB)</option>
+									</optgroup>
+								</select>
 							</div>
 							<div class="mb-3">
 								<label class="form-label">Year level</label>
 								<select name="year_level" class="form-select">
-									<option value="1">1</option>
-									<option value="2">2</option>
-									<option value="3">3</option>
-									<option value="4">4</option>
-									<option value="5">5</option>
+									<?php for ($i = 1; $i <= 5; $i++): ?>
+										<option value="<?php echo $i; ?>" <?php echo ($formData['year_level'] == (string)$i) ? 'selected' : ''; ?>><?php echo $i; ?></option>
+									<?php endfor; ?>
 								</select>
 							</div>
 							<div class="mb-3">
 								<label class="form-label">Student number</label>
-								<input type="text" name="student_number" class="form-control">
+								<input type="text" name="student_number" class="form-control" value="<?php echo htmlspecialchars($formData['student_number']); ?>">
 							</div>
 						</div>
 
@@ -105,15 +264,44 @@ include __DIR__ . '/../includes/header.php';
 						<div id="facultyFields" style="display:none;">
 							<div class="mb-3">
 								<label class="form-label">Department</label>
-								<input type="text" name="department" class="form-control">
+								<select name="department" class="form-select">
+									<option value="">-- Select a department --</option>
+									<optgroup label="College of Computing and Information Technology (CCIT)">
+										<option value="College of Computing and Information Technology (CCIT)" <?php echo ($formData['department'] === 'College of Computing and Information Technology (CCIT)') ? 'selected' : ''; ?>>College of Computing and Information Technology (CCIT)</option>
+									</optgroup>
+									<optgroup label="College of Engineering">
+										<option value="College of Engineering" <?php echo ($formData['department'] === 'College of Engineering') ? 'selected' : ''; ?>>College of Engineering</option>
+									</optgroup>
+									<optgroup label="College of Science">
+										<option value="College of Science" <?php echo ($formData['department'] === 'College of Science') ? 'selected' : ''; ?>>College of Science</option>
+									</optgroup>
+									<optgroup label="College of Business Administration">
+										<option value="College of Business Administration" <?php echo ($formData['department'] === 'College of Business Administration') ? 'selected' : ''; ?>>College of Business Administration</option>
+									</optgroup>
+									<optgroup label="College of Education and Liberal Arts">
+										<option value="College of Education and Liberal Arts" <?php echo ($formData['department'] === 'College of Education and Liberal Arts') ? 'selected' : ''; ?>>College of Education and Liberal Arts</option>
+									</optgroup>
+									<optgroup label="College of Architecture">
+										<option value="College of Architecture" <?php echo ($formData['department'] === 'College of Architecture') ? 'selected' : ''; ?>>College of Architecture</option>
+									</optgroup>
+									<optgroup label="College of Nursing">
+										<option value="College of Nursing" <?php echo ($formData['department'] === 'College of Nursing') ? 'selected' : ''; ?>>College of Nursing</option>
+									</optgroup>
+									<optgroup label="College of Pharmacy">
+										<option value="College of Pharmacy" <?php echo ($formData['department'] === 'College of Pharmacy') ? 'selected' : ''; ?>>College of Pharmacy</option>
+									</optgroup>
+									<optgroup label="College of Law">
+										<option value="College of Law" <?php echo ($formData['department'] === 'College of Law') ? 'selected' : ''; ?>>College of Law</option>
+									</optgroup>
+								</select>
 							</div>
 							<div class="mb-3">
 								<label class="form-label">Specialization</label>
-								<input type="text" name="specialization" class="form-control">
+								<input type="text" name="specialization" class="form-control" value="<?php echo htmlspecialchars($formData['specialization']); ?>">
 							</div>
 							<div class="mb-3">
 								<label class="form-label">Faculty number</label>
-								<input type="text" name="faculty_number" class="form-control">
+								<input type="text" name="faculty_number" class="form-control" value="<?php echo htmlspecialchars($formData['faculty_number']); ?>">
 							</div>
 						</div>
 
@@ -125,12 +313,67 @@ include __DIR__ . '/../includes/header.php';
 							</div>
 						</div>
 
-						<button class="btn btn-primary" type="submit">Create account</button>
+						<button class="btn btn-primary" type="submit"><?php echo ($mode === 'update') ? 'Update account' : 'Create account'; ?></button>
+						<?php if ($mode === 'update'): ?>
+							<a href="register.php" class="btn btn-link">Back to create mode</a>
+						<?php endif; ?>
 					</form>
 				</div>
 			</div>
 		</div>
 	</div>
+	<?php if ($isAdmin): ?>
+	<div class="row justify-content-center mt-4">
+		<div class="col-md-10">
+			<div class="card">
+				<div class="card-body">
+					<h5 class="card-title">Manage existing accounts</h5>
+					<p class="small text-muted">Click Edit to load a user into the form above, or Delete to remove the account.</p>
+					<?php if (empty($userList)): ?>
+						<p class="text-muted mb-0">No accounts found.</p>
+					<?php else: ?>
+						<div class="table-responsive">
+							<table class="table table-striped align-middle mb-0">
+								<thead>
+									<tr>
+										<th>ID</th>
+										<th>Name</th>
+										<th>Email</th>
+										<th>Role</th>
+										<th>Status</th>
+										<th class="text-end">Actions</th>
+									</tr>
+								</thead>
+								<tbody>
+									<?php foreach ($userList as $u): ?>
+										<tr>
+											<td><?php echo htmlspecialchars($u['user_id']); ?></td>
+											<td><?php echo htmlspecialchars($u['name']); ?></td>
+											<td><?php echo htmlspecialchars($u['email']); ?></td>
+											<td><?php echo htmlspecialchars($u['role']); ?></td>
+											<td><?php echo htmlspecialchars($u['status']); ?></td>
+											<td class="text-end">
+												<form action="register.php" method="get" class="d-inline">
+													<input type="hidden" name="edit_user_id" value="<?php echo htmlspecialchars($u['user_id']); ?>">
+													<button class="btn btn-sm btn-outline-primary">Edit</button>
+												</form>
+												<form action="../actions/register_action.php" method="post" class="d-inline" onsubmit="return confirm('Delete this account?');">
+													<input type="hidden" name="action" value="delete">
+													<input type="hidden" name="user_id" value="<?php echo htmlspecialchars($u['user_id']); ?>">
+													<button class="btn btn-sm btn-outline-danger">Delete</button>
+												</form>
+											</td>
+										</tr>
+									<?php endforeach; ?>
+								</tbody>
+							</table>
+						</div>
+					<?php endif; ?>
+				</div>
+			</div>
+		</div>
+	</div>
+	<?php endif; ?>
 </div>
 
 <script>
@@ -199,6 +442,12 @@ include __DIR__ . '/../includes/header.php';
 		preview.src = URL.createObjectURL(f);
 		preview.style.display = '';
 	});
+
+	const existingImage = <?php echo json_encode($formData['profile_picture']); ?>;
+	if (existingImage) {
+		preview.src = existingImage;
+		preview.style.display = '';
+	}
 
 	// FINAL VALIDATION ON SUBMIT
 	form.addEventListener('submit', function (e) {
