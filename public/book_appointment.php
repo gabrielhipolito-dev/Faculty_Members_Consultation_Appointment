@@ -196,7 +196,7 @@ include __DIR__ . '/../includes/header.php';
                             </div>
 
                             <!-- Appointment Date -->
-                            <div class="mb-4">
+                            <div class="mb-3">
                                 <label for="appointment_date" class="form-label fw-bold">Appointment Date *</label>
                                 <input type="date" class="form-control form-control-lg" id="appointment_date" name="appointment_date" required min="<?php echo date('Y-m-d', strtotime('+1 day')); ?>" style="border-radius: 8px;">
                                 <small class="text-muted">Select a date that matches your chosen time slot's day.</small>

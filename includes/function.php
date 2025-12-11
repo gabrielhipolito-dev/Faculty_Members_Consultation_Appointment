@@ -9,7 +9,7 @@
  */
 function get_avatar_path($conn, $user)
 {
-	$default = '../uploads/profile_pics/default.png';
+	$default = '../uploads/profile_pics/default_image.png';
 	if (!$user) {
 		return $default;
 	}

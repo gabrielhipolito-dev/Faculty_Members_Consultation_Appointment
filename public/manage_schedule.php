@@ -1,6 +1,6 @@
 <?php
 // public/manage_schedule.php - Faculty schedule management
-session_start();
+require_once __DIR__ . '/../actions/load_user.php';
 require_once __DIR__ . '/../config/db.php';
 
 // Check if logged in and is faculty
@@ -9,18 +9,7 @@ if (!isset($_SESSION['user_id'])) {
     exit;
 }
 
-// Verify faculty role
-$stmt = $conn->prepare("SELECT u.user_id, u.role, u.name FROM Users u WHERE u.user_id = ? LIMIT 1");
-$stmt->bind_param('i', $_SESSION['user_id']);
-$stmt->execute();
-$res = $stmt->get_result();
-if (!$res || $res->num_rows === 0) {
-    header("Location: login.php");
-    exit;
-}
-$user = $res->fetch_assoc();
-$stmt->close();
-
+// Verify faculty role - $user already loaded by load_user.php
 if ($user['role'] !== 'Faculty') {
     header("Location: index.php?error=Only faculty can manage schedules");
     exit;
