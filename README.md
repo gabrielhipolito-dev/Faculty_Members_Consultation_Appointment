@@ -37,6 +37,7 @@ This guide provides the streamlined process for setting up the **Faculty Members
 3.  Ensure both modules turn **green** before proceeding. 
 
 ### 2.2. 📂 Navigate to htdocs using Git Bash
+![Cloning Repository](setup_images/cloning_repo.png)
 
 We need to navigate to the web root folder, `htdocs`.
 
@@ -54,7 +55,9 @@ We need to navigate to the web root folder, `htdocs`.
     cd xampp/htdocs
     ```
 
+
 ### 2.3. 📥 Clone the Repository and Open Code Editor
+![Go to Main Repository](setup_images/go_to_mainrepo.png)
 
 1.  While in the `htdocs` directory in Git Bash, run the clone command. This downloads the repository and creates the project folder.
 
@@ -84,7 +87,6 @@ The project requires a database named **`faculty_consultation1`** and uses the *
 
 1.  **Access phpMyAdmin:** Open your browser and go to `http://localhost/phpmyadmin/`.
 2.  **Import Data:**
-    * **Select** the newly created **`faculty_consultation1`** from the left sidebar.
     * Click the **Import** tab at the top.
     * Click **Choose file** and locate the database dump file: **`main_db.sql`** (it should be inside your project folder).
     * Click the **Go** button to execute the import.
