@@ -29,6 +29,7 @@ This guide provides the streamlined process for setting up the **Faculty Members
 ## 2. Server Activation and Project Cloning
 
 ### 2.1. 🟢 Start XAMPP Services
+![Cloning Repository](setup_images/XAMPP.png)
 
 1.  Open the **XAMPP Control Panel**.
 2.  Click the **Start** button for the following modules:
@@ -57,7 +58,7 @@ We need to navigate to the web root folder, `htdocs`.
 
 
 ### 2.3. 📥 Clone the Repository and Open Code Editor
-![Go to Main Repository](setup_images/go_to_mainrepo.png)
+
 
 1.  While in the `htdocs` directory in Git Bash, run the clone command. This downloads the repository and creates the project folder.
 
@@ -66,7 +67,7 @@ We need to navigate to the web root folder, `htdocs`.
     ```
 
 2.  Change your directory (`cd`) *into* the newly cloned repository folder:
-
+![Go to Main Repository](setup_images/go_to_mainrepo.png)
     ```bash
     cd Faculty_Members_Consultation_Appointment
     ```
@@ -83,25 +84,30 @@ We need to navigate to the web root folder, `htdocs`.
 
 ### 3.1. ⚙️ Database Setup
 
-The project requires a database named **`faculty_consultation1`** and uses the **`main_db.sql`** file for table creation and initial data.
+The project requires the **`main_db.sql`** file for table creation and initial data.
+
 
 1.  **Access phpMyAdmin:** Open your browser and go to `http://localhost/phpmyadmin/`.
 2.  **Import Data:**
     * Click the **Import** tab at the top.
     * Click **Choose file** and locate the database dump file: **`main_db.sql`** (it should be inside your project folder).
+      ![Cloning Repository](setup_images/find_db.png)
     * Click the **Go** button to execute the import.
+      ![Cloning Repository](setup_images/Click_import.png)
 
 ### 3.2. 🔑 Set Admin Password (Using Hash Generator)
 
 Because passwords are secured using PHP's `password_hash` function (bcrypt) to prevent SQL injection, the initial admin password must be set manually.
 
 1.  **Generate the Hash:**
-    * Open your web browser and navigate to the file responsible for generating the hash:
+    * The script in this file is: `<?php echo password_hash('admin123', PASSWORD_DEFAULT); ?>`
+      ![Cloning Repository](setup_images/hash_password.png)
+    *  * Open your web browser and navigate to the file responsible for generating the hash:
         ```
         http://localhost/Faculty_Members_Consultation_Appointment/generate_hash.php
         ```
-    * The script in this file is: `<?php echo password_hash('admin123', PASSWORD_DEFAULT); ?>`
     * The browser will display a long, hashed string (e.g., `$2y$10$T8O...`). **Copy this entire string.**
+      ![Cloning Repository](setup_images/copy_hash_pass.png)
 
 2.  **Update the Database:**
     * Go back to phpMyAdmin: `http://localhost/phpmyadmin/`.
