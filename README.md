@@ -114,8 +114,9 @@ Because passwords are secured using PHP's `password_hash` function (bcrypt) to p
     * Select the **`faculty_consultation1`** database.
     * Click on the **`user`** table.
     * Find the **admin** record (or the user you wish to update).
-    * Click **Edit**.
+     ![Cloning Repository](setup_images/update_db.png)
     * Locate the `password` field and **paste the copied hash string** into the Value input box.
+      ![Cloning Repository](setup_images/chage_hash_pass_db.png)
     * Click **Go** to save the changes.
 
 ### 3.3. 🌐 Access the Application
